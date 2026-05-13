@@ -1,5 +1,7 @@
 using EventBookingSystem.Data;
 using EventBookingSystem.Models;
+using EventBookingSystem.Services;
+using EventBookingSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +9,13 @@ namespace EventBookingSystem
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IdentitySeeder>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
@@ -22,6 +26,7 @@ namespace EventBookingSystem
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
+                options.Password.RequireDigit = false;
             })
             .AddEntityFrameworkStores<AppDbContext>();
 
@@ -46,6 +51,12 @@ namespace EventBookingSystem
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var identitySeeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
+                await identitySeeder.SeedAdminAccountAsync();
+            }
 
             app.Run();
         }
