@@ -1,9 +1,14 @@
+using System.Globalization;
 using EventBookingSystem.Data;
 using EventBookingSystem.Models;
+using EventBookingSystem.Repositories;
+using EventBookingSystem.Repositories.Interfaces;
 using EventBookingSystem.Services;
 using EventBookingSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace EventBookingSystem
 {
@@ -13,8 +18,23 @@ namespace EventBookingSystem
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var egpCulture = new CultureInfo("en-EG");
+            egpCulture.NumberFormat.CurrencyPositivePattern = 2;
+            CultureInfo.DefaultThreadCurrentCulture = egpCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = egpCulture;
+
+            builder.Services.Configure<RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture(egpCulture);
+                options.SupportedCultures = [egpCulture];
+                options.SupportedUICultures = [egpCulture];
+            });
+
             // Add services to the container.
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IEventService, EventService>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IdentitySeeder>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -41,6 +61,7 @@ namespace EventBookingSystem
             }
 
             app.UseHttpsRedirection();
+            app.UseRequestLocalization(app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
             app.UseRouting();
 
             app.UseAuthentication();

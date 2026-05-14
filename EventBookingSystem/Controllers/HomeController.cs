@@ -1,14 +1,16 @@
 using EventBookingSystem.Models;
+using EventBookingSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace EventBookingSystem.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController(IEventService eventService) : Controller
     {
-        public IActionResult Index()
+        public async Task<IActionResult> Index(CancellationToken ct)
         {
-            return View();
+            var events = await eventService.GetEventCardsAsync(ct);
+            return View(events);
         }
 
         public IActionResult Privacy()

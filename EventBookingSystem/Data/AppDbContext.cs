@@ -32,11 +32,11 @@ namespace EventBookingSystem.Data
                 .HavePrecision(18, 2);
         }
 
-        DbSet<Event> Events { get; set; }
-        DbSet<TicketType> TicketTypes { get; set; }
-        DbSet<Booking> Bookings { get; set; }
-        DbSet<BookingItem> BookingItems { get; set; }
-        DbSet<Payment> Payments { get; set; }
-        DbSet<Notification> Notifications { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<TicketType> TicketTypes { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
+        public DbSet<BookingItem> BookingItems { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
     }
 }
