@@ -95,7 +95,7 @@
 @if (User.IsInRole("Admin") && !Model.IsCancelled)
 {
 
-    var cancelModal = new EventBookingSystem.ViewModels.EventCancelModalViewModel
+    var cancelModal = new EventBookingSystem.Areas.Admin.ViewModels.EventCancelModalViewModel
     {
         Id = Model.Id,
         Name = Model.Name,

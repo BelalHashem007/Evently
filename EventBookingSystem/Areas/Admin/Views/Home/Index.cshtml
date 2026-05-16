@@ -1,0 +1,39 @@
+@model DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Dashboard</h1>
+        <p class="text-muted mb-0">Overview of events, users, and bookings.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    @foreach (var stat in Model.Stats)
+    {
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted mb-1">@stat.Title</p>
+                    <h2 class="h4 mb-1">@stat.Value</h2>
+                    <p class="small text-muted mb-0">@stat.Description</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h2 class="h5 mb-3">Quick Actions</h2>
+        <div class="d-flex flex-wrap gap-2">
+            @foreach (var action in Model.QuickActions)
+            {
+                <a class="@action.CssClass" asp-area="Admin" asp-controller="@action.Controller" asp-action="@action.Action">@action.Label</a>
+            }
+        </div>
+    </div>
+</div>

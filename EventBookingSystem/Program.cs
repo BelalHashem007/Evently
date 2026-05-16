@@ -36,6 +36,9 @@ namespace EventBookingSystem
             // Add services to the container.
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IEventService, EventService>();
+            builder.Services.AddScoped<IDashboardService, DashboardService>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IdentitySeeder>();

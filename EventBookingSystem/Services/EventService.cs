@@ -38,6 +38,35 @@ namespace EventBookingSystem.Services
                 .ToList();
         }
 
+        public async Task<IReadOnlyList<AdminEventListItemViewModel>> GetAdminEventListAsync(CancellationToken ct = default)
+        {
+            var events = (await unitOfWork.Events.GetAllAsync(ct))
+                .OrderByDescending(e => e.Date)
+                .ToList();
+
+            if (events.Count == 0)
+            {
+                return [];
+            }
+
+            var eventIds = events.Select(e => e.Id).ToList();
+            var ticketTypeCounts = (await unitOfWork.TicketTypes.FindAsync(t => eventIds.Contains(t.EventId), ct))
+                .GroupBy(t => t.EventId)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            return events
+                .Select(e => new AdminEventListItemViewModel
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    Date = e.Date,
+                    Venue = e.Venue,
+                    IsCancelled = e.IsCancelled,
+                    TicketTypeCount = ticketTypeCounts.GetValueOrDefault(e.Id)
+                })
+                .ToList();
+        }
+
         public async Task<EventDetailsViewModel?> GetEventDetailsAsync(int id, CancellationToken ct = default)
         {
             var eventItem = await unitOfWork.Events.GetByIdAsync(id, ct);

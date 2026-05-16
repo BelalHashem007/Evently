@@ -38,7 +38,7 @@
 
 @if (User.IsInRole("Admin"))
 {
-    var cancelModal = new EventBookingSystem.ViewModels.EventCancelModalViewModel
+    var cancelModal = new EventBookingSystem.Areas.Admin.ViewModels.EventCancelModalViewModel
     {
         Id = Model.Id,
         Name = Model.Name,

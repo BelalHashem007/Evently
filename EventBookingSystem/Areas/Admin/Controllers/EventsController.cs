@@ -11,6 +11,13 @@ namespace EventBookingSystem.Areas.Admin.Controllers
     public class EventsController(IEventService eventService) : Controller
     {
         [HttpGet]
+        public async Task<IActionResult> Index(CancellationToken ct)
+        {
+            var events = await eventService.GetAdminEventListAsync(ct);
+            return View(events);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Create(CancellationToken ct)
         {
             var model = await eventService.GetCreateFormAsync(ct);

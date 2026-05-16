@@ -8,6 +8,7 @@ namespace EventBookingSystem.Repositories
     public class UnitOfWork(
         IBaseRepository<Event> eventRepo,
         IBaseRepository<TicketType> ticketTypeRepo,
+        IBaseRepository<Booking> bookingRepo,
         IBaseRepository<BookingItem> bookingItemRepo,
         AppDbContext context,
         ILogger<UnitOfWork> logger
@@ -15,6 +16,7 @@ namespace EventBookingSystem.Repositories
     {
         public IBaseRepository<Event> Events => eventRepo;
         public IBaseRepository<TicketType> TicketTypes => ticketTypeRepo;
+        public IBaseRepository<Booking> Bookings => bookingRepo;
         public IBaseRepository<BookingItem> BookingItems => bookingItemRepo;
 
         public async Task<int> CompleteAsync(CancellationToken ct)
