@@ -22,8 +22,8 @@
 @if (User.IsInRole("Admin") && !Model.IsCancelled)
 {
     <div class="d-flex gap-2 mb-4">
-        <a asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id" asp-area="Admin" class="btn btn-outline-secondary">Edit</a>
-        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancel-event-modal-@Model.Id">Cancel</button>
+        <a asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id" asp-area="Admin" class="btn btn-secondary">Edit</a>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancel-event-modal-@Model.Id">Cancel</button>
     </div>
 }
 

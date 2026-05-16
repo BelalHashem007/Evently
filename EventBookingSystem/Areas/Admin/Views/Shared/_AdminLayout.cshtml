@@ -1,3 +1,14 @@
+@{
+    var currentArea = ViewContext.RouteData.Values["area"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var isAdminArea = string.Equals(currentArea, "Admin", StringComparison.OrdinalIgnoreCase);
+
+    var isDashboardActive = isAdminArea && string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase);
+    var isEventsActive = isAdminArea && string.Equals(currentController, "Events", StringComparison.OrdinalIgnoreCase);
+    var isBookingsActive = isAdminArea && string.Equals(currentController, "Bookings", StringComparison.OrdinalIgnoreCase);
+    var isUsersActive = isAdminArea && string.Equals(currentController, "Users", StringComparison.OrdinalIgnoreCase);
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,32 +16,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Admin - EventBookingSystem</title>
     <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/EventBookingSystem.styles.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </head>
 <body class="mb-0">
     <div class="d-flex min-vh-100">
-        <aside class="border-end bg-light p-3" style="width: 260px;">
-            <a class="navbar-brand d-block fw-semibold mb-4" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin</a>
-            <nav class="nav nav-pills flex-column gap-1">
-                <a class="nav-link text-dark" asp-area="Admin" asp-controller="Home" asp-action="Index">Dashboard</a>
-                <a class="nav-link text-dark" asp-area="Admin" asp-controller="Events" asp-action="Index">Events</a>
-                <a class="nav-link text-dark" asp-area="Admin" asp-controller="Bookings" asp-action="Index">Bookings</a>
-                <a class="nav-link text-dark" asp-area="Admin" asp-controller="Users" asp-action="Index">Users</a>
-            </nav>
-            <hr />
-            <a class="btn btn-outline-secondary w-100" asp-area="" asp-controller="Home" asp-action="Index">Back to Site</a>
+        <aside>
+            <div class="d-flex flex-column h-100 flex-shrink-0 p-3 text-bg-dark"
+                 style="width: 280px">
+                <a href="/"
+                       class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                    <span class="fs-4">EventBookingSystem</span>
+                </a>
+                <hr />
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a asp-controller="Home" asp-action="Index" asp-area="Admin" class="nav-link @(isDashboardActive ? "active" : "text-white")" aria-current="@(isDashboardActive ? "page" : null)">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Events" asp-action="Index" asp-area="Admin" class="nav-link @(isEventsActive ? "active" : "text-white")" aria-current="@(isEventsActive ? "page" : null)">
+                            Events
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Bookings" asp-action="Index" asp-area="Admin" class="nav-link @(isBookingsActive ? "active" : "text-white")" aria-current="@(isBookingsActive ? "page" : null)">
+                            Bookings
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Users" asp-action="Index" asp-area="Admin" class="nav-link @(isUsersActive ? "active" : "text-white")" aria-current="@(isUsersActive ? "page" : null)">
+                            Users
+                        </a>
+                    </li>
+                </ul>
+                <hr />
+                <a class="btn btn-secondary w-100" asp-area="" asp-controller="Home" asp-action="Index">Back to Site</a>
+            </div>
+
         </aside>
 
         <div class="flex-grow-1">
-            <header class="border-bottom bg-white">
+            <header class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
                 <div class="container-fluid py-3 d-flex justify-content-between align-items-center">
                     <span class="fw-semibold">@ViewData["Title"]</span>
                     <div class="d-flex align-items-center gap-3">
                         <span class="text-muted">@User.Identity?.Name</span>
                         <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-link text-dark p-0">Logout</button>
+                            <button type="submit" class="btn btn-link p-0">Logout</button>
                         </form>
                     </div>
                 </div>

@@ -7,12 +7,12 @@
         <input type="hidden" asp-for="HasBookingItems" />
 
         <div class="row g-3">
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <label asp-for="Name" class="form-label"></label>
                 <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <span asp-validation-for="Name" class="bg-danger"></span>
             </div>
-            <div class="col-md-3">
+            <div class="col-lg-3">
                 <label asp-for="Price" class="form-label"></label>
                 @if (Model.HasBookingItems)
                 {
@@ -23,15 +23,15 @@
                 {
                     <input asp-for="Price" class="form-control" />
                 }
-                <span asp-validation-for="Price" class="text-danger"></span>
+                <span asp-validation-for="Price" class="bg-danger"></span>
             </div>
-            <div class="col-md-3">
+            <div class="col-lg-3">
                 <label asp-for="Quantity" class="form-label"></label>
                 <input asp-for="Quantity" class="form-control" />
-                <span asp-validation-for="Quantity" class="text-danger"></span>
+                <span asp-validation-for="Quantity" class="bg-danger"></span>
             </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="button" class="btn btn-outline-danger w-100" data-remove-ticket-type>Remove</button>
+            <div class="col-lg-2 d-flex align-items-end">
+                <button type="button" class="btn btn-danger w-100" data-remove-ticket-type>Remove</button>
             </div>
         </div>
     </div>

@@ -1,53 +1,53 @@
 @model EventFormViewModel
 
-<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div asp-validation-summary="ModelOnly" class="bg-danger mb-3"></div>
 
 <div class="mb-3">
     <label asp-for="Name" class="form-label">
         <span>Name</span>
-        <span class="text-danger">*</span>
+        <span class="required-mark">*</span>
     </label>
     <input asp-for="Name" class="form-control" />
-    <span asp-validation-for="Name" class="text-danger"></span>
+    <span asp-validation-for="Name" class="bg-danger"></span>
 </div>
 
 <div class="mb-3">
     <label asp-for="Description" class="form-label">
         <span>Description</span>
-        <span class="text-danger">*</span>
+        <span class="required-mark">*</span>
     </label>
     <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-    <span asp-validation-for="Description" class="text-danger"></span>
+    <span asp-validation-for="Description" class="bg-danger"></span>
 </div>
 
 <div class="mb-3">
     <label asp-for="Date" class="form-label">
         <span>Date</span>
-        <span class="text-danger">*</span>
+        <span class="required-mark">*</span>
     </label>
     <input asp-for="Date" class="form-control" />
-    <span asp-validation-for="Date" class="text-danger"></span>
+    <span asp-validation-for="Date" class="bg-danger"></span>
 </div>
 
 <div class="mb-3">
     <label asp-for="Venue" class="form-label">
         <span>Venue</span>
-        <span class="text-danger">*</span>
+        <span class="required-mark">*</span>
     </label>
     <input asp-for="Venue" class="form-control" />
-    <span asp-validation-for="Venue" class="text-danger"></span>
+    <span asp-validation-for="Venue" class="bg-danger"></span>
 </div>
 
 <div class="mb-4">
     <label asp-for="ImageUrl" class="form-label"></label>
     <input asp-for="ImageUrl" class="form-control" />
-    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+    <span asp-validation-for="ImageUrl" class="bg-danger"></span>
 </div>
 
 <section class="mb-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="h5 mb-0">Ticket Types <span class="text-danger">*</span></h2>
-        <button type="button" class="btn btn-outline-secondary btn-sm" id="add-ticket-type">Add Ticket Type</button>
+        <h2 class="h5 mb-0">Ticket Types <span class="required-mark">*</span></h2>
+        <button type="button" class="btn btn-primary btn-sm" id="add-ticket-type">Add Ticket Type</button>
     </div>
 
     <div id="ticket-types-container">

@@ -25,12 +25,12 @@
         </p>
 
         <div class="mt-auto d-flex gap-2 flex-wrap">
-            <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-primary">View Details</a>
+            <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary">View Details</a>
 
             @if (User.IsInRole("Admin"))
             {
-                <a asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id" asp-area="Admin" class="btn btn-outline-secondary">Edit</a>
-                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" asp-area="Admin" data-bs-target="#cancel-event-modal-@Model.Id">Cancel</button>
+                <a asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id" asp-area="Admin" class="btn btn-secondary">Edit</a>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" asp-area="Admin" data-bs-target="#cancel-event-modal-@Model.Id">Cancel</button>
             }
         </div>
     </div>

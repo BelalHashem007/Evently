@@ -57,13 +57,15 @@ namespace EventBookingSystem.Services
                     {
                         Label = "View Bookings",
                         Controller = "Bookings",
-                        Action = "Index"
+                        Action = "Index",
+                        CssClass = "btn btn-outline-info"
                     },
                     new DashboardQuickActionViewModel
                     {
                         Label = "Manage Users",
                         Controller = "Users",
-                        Action = "Index"
+                        Action = "Index",
+                        CssClass = "btn btn-outline-info"
                     }
                 ]
             };
