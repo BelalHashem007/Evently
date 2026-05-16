@@ -1,3 +1,4 @@
+using EventBookingSystem.Areas.Admin.ViewModels;
 using EventBookingSystem.Common.Results;
 using EventBookingSystem.ViewModels;
 

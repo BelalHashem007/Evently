@@ -12,7 +12,7 @@
 
     @if (User.IsInRole("Admin"))
     {
-        <a asp-controller="Events" asp-action="Create" class="btn btn-primary">Create New Event</a>
+        <a asp-controller="Events" asp-action="Create" asp-area="Admin" class="btn btn-primary">Create New Event</a>
     }
 </div>
 

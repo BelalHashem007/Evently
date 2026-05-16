@@ -1,0 +1,25 @@
+@model EventFormViewModel
+
+@{
+    ViewData["Title"] = "Create Event";
+}
+
+<div class="mb-4">
+    <a asp-controller="Home" asp-action="Index" asp-area="" class="btn btn-link px-0">&larr; Back to events</a>
+</div>
+
+<h1 class="mb-4">Create Event</h1>
+
+<form asp-controller="Events" asp-action="Create" asp-area="Admin" method="post">
+    <partial name="~/Areas/Admin/Views/Events/PartialViews/_EventForm.cshtml" model="Model" />
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Create Event</button>
+        <a asp-controller="Home" asp-action="Index" asp-area="" class="btn btn-outline-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="~/Areas/Admin/Views/Events/PartialViews/_EventFormScripts.cshtml" />
+}

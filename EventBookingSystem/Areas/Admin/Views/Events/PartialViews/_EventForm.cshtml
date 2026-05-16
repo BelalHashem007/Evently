@@ -55,7 +55,7 @@
         {
             var ticketRowViewData = new ViewDataDictionary(ViewData);
             ticketRowViewData.TemplateInfo.HtmlFieldPrefix = $"TicketTypes[{i}]";
-            <partial name="/Views/Events/PartialViews/_TicketTypeFormRow.cshtml" model="Model.TicketTypes[i]" view-data="ticketRowViewData" />
+            <partial name="~/Areas/Admin/Views/Events/PartialViews/_TicketTypeFormRow.cshtml" model="Model.TicketTypes[i]" view-data="ticketRowViewData" />
         }
     </div>
 
@@ -64,6 +64,6 @@
             var templateViewData = new ViewDataDictionary(ViewData);
             templateViewData.TemplateInfo.HtmlFieldPrefix = "TicketTypes[__index__]";
         }
-        <partial name="/Views/Events/PartialViews/_TicketTypeFormRow.cshtml" model="new TicketTypeFormViewModel()" view-data="templateViewData" />
+        <partial name="~/Areas/Admin/Views/Events/PartialViews/_TicketTypeFormRow.cshtml" model="new TicketTypeFormViewModel()" view-data="templateViewData" />
     </template>
 </section>

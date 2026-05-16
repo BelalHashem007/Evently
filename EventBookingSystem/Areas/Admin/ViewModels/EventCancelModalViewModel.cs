@@ -1,4 +1,4 @@
-namespace EventBookingSystem.ViewModels
+namespace EventBookingSystem.Areas.Admin.ViewModels
 {
     public class EventCancelModalViewModel
     {

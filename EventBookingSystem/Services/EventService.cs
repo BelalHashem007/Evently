@@ -1,3 +1,4 @@
+using EventBookingSystem.Areas.Admin.ViewModels;
 using EventBookingSystem.Common.Results;
 using EventBookingSystem.Models;
 using EventBookingSystem.Repositories.Interfaces;
@@ -251,6 +252,8 @@ namespace EventBookingSystem.Services
             Result dbResult = await unitOfWork.TryCompeleteAsync(ct);
             return dbResult;
         }
+
+        //helpers
 
         private static List<TicketTypeFormViewModel> GetActiveTicketTypes(IEnumerable<TicketTypeFormViewModel> ticketTypes)
         {
