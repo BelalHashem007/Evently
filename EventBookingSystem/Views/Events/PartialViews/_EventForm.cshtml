@@ -1,0 +1,69 @@
+@model EventFormViewModel
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label">
+        <span>Name</span>
+        <span class="text-danger">*</span>
+    </label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Description" class="form-label">
+        <span>Description</span>
+        <span class="text-danger">*</span>
+    </label>
+    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Date" class="form-label">
+        <span>Date</span>
+        <span class="text-danger">*</span>
+    </label>
+    <input asp-for="Date" class="form-control" />
+    <span asp-validation-for="Date" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Venue" class="form-label">
+        <span>Venue</span>
+        <span class="text-danger">*</span>
+    </label>
+    <input asp-for="Venue" class="form-control" />
+    <span asp-validation-for="Venue" class="text-danger"></span>
+</div>
+
+<div class="mb-4">
+    <label asp-for="ImageUrl" class="form-label"></label>
+    <input asp-for="ImageUrl" class="form-control" />
+    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+</div>
+
+<section class="mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Ticket Types <span class="text-danger">*</span></h2>
+        <button type="button" class="btn btn-outline-secondary btn-sm" id="add-ticket-type">Add Ticket Type</button>
+    </div>
+
+    <div id="ticket-types-container">
+        @for (var i = 0; i < Model.TicketTypes.Count; i++)
+        {
+            var ticketRowViewData = new ViewDataDictionary(ViewData);
+            ticketRowViewData.TemplateInfo.HtmlFieldPrefix = $"TicketTypes[{i}]";
+            <partial name="/Views/Events/PartialViews/_TicketTypeFormRow.cshtml" model="Model.TicketTypes[i]" view-data="ticketRowViewData" />
+        }
+    </div>
+
+    <template id="ticket-type-row-template">
+        @{
+            var templateViewData = new ViewDataDictionary(ViewData);
+            templateViewData.TemplateInfo.HtmlFieldPrefix = "TicketTypes[__index__]";
+        }
+        <partial name="/Views/Events/PartialViews/_TicketTypeFormRow.cshtml" model="new TicketTypeFormViewModel()" view-data="templateViewData" />
+    </template>
+</section>

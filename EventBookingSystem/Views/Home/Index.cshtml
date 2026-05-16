@@ -12,7 +12,7 @@
 
     @if (User.IsInRole("Admin"))
     {
-        <button type="button" class="btn btn-primary" disabled>Create New Event</button>
+        <a asp-controller="Events" asp-action="Create" class="btn btn-primary">Create New Event</a>
     }
 </div>
 
@@ -26,7 +26,7 @@ else
         @foreach (var eventItem in Model)
         {
             <div class="col-md-6 col-xl-4">
-                <partial name="_EventCard" model="eventItem" />
+                <partial name="PartialViews/_EventCard" model="eventItem" />
             </div>
         }
     </div>

@@ -1,0 +1,21 @@
+@model EventCancelModalViewModel
+
+<div class="modal fade" id="@Model.ModalId" tabindex="-1" aria-labelledby="@($"{Model.ModalId}-label")" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="@($"{Model.ModalId}-label")">Cancel event</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Cancel <strong>@Model.Name</strong>? Event stays in database but disappears from homepage.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep Event</button>
+                <form asp-controller="Events" asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Cancel Event</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

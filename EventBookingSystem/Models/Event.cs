@@ -14,5 +14,8 @@ namespace EventBookingSystem.Models
         [Required]
         public string Venue { get; set; }
         public string? ImageUrl { get; set; }
+        public bool IsCancelled { get; set; }
+
+        public List<TicketType> TicketTypes { get; set; } = [];
     }
 }

@@ -27,7 +27,7 @@ Event details pages should show:
 
 ## Current Status
 
-Implementation is complete and verified with `dotnet build`.
+Implementation is complete, committed, merged into `master`, and the feature branch has been deleted.
 
 Existing findings:
 
@@ -66,11 +66,13 @@ Existing findings:
 - [x] Handled missing event images gracefully in views.
 - [x] Verified with `dotnet build`.
 - [x] Checked diagnostics/lints for edited files.
+- [x] Committed with Conventional Commits message `feat: show events on homepage and details page`.
+- [x] Merged `feat/events-home-details` into `master`.
+- [x] Deleted the feature branch after merge.
 
 ## Remaining Tasks
 
-- [ ] Suggest a Conventional Commits message instead of running `git commit`.
-- [ ] After the user commits and explicitly approves the git workflow continuation, merge the feature branch back into the main development branch and delete the feature branch.
+- None for this plan.
 
 ## Decisions Made
 
@@ -96,4 +98,4 @@ Existing findings:
 
 ## Next Immediate Action
 
-Review the implemented UI, then commit the changes manually with the suggested Conventional Commits message.
+Start the next feature plan, such as admin event create/edit/delete or ticket booking flow.

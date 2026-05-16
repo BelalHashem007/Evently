@@ -1,14 +1,17 @@
-using System.Globalization;
 using EventBookingSystem.Data;
+using EventBookingSystem.Exceptions;
+using EventBookingSystem.Middlewares;
 using EventBookingSystem.Models;
 using EventBookingSystem.Repositories;
 using EventBookingSystem.Repositories.Interfaces;
 using EventBookingSystem.Services;
 using EventBookingSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace EventBookingSystem
 {
@@ -50,6 +53,12 @@ namespace EventBookingSystem
             })
             .AddEntityFrameworkStores<AppDbContext>();
 
+            //override Identity's default path for login
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/auth/login";
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -67,6 +76,9 @@ namespace EventBookingSystem
             app.UseAuthentication();
             app.UseAuthorization();
 
+            //custom middleware to redirect authenticated user when he tries to access prohibited paths e.g. /auth/login
+            app.UseRedirectMiddleware();
+
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
@@ -75,8 +87,21 @@ namespace EventBookingSystem
 
             using (var scope = app.Services.CreateScope())
             {
-                var identitySeeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
-                await identitySeeder.SeedAdminAccountAsync();
+                try
+                {
+                    var identitySeeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
+                    await identitySeeder.SeedAdminAccountAsync();
+                }
+                catch (AdminSeedException ex)
+                {
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    logger.LogCritical(ex, "Identity Seeding failed. The app will continue, but admin features may be unavailable.");
+                }
+                catch (Exception ex)
+                {
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An unexpected error occurred during startup.");
+                }
             }
 
             app.Run();

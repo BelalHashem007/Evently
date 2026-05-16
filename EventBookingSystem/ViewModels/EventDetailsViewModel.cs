@@ -8,6 +8,7 @@ namespace EventBookingSystem.ViewModels
         public string Venue { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
+        public bool IsCancelled { get; set; }
         public IReadOnlyList<TicketTypeCardViewModel> TicketTypes { get; set; } = [];
     }
 }

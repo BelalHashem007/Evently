@@ -29,9 +29,22 @@
 
             @if (User.IsInRole("Admin"))
             {
-                <button type="button" class="btn btn-outline-secondary" disabled>Edit</button>
-                <button type="button" class="btn btn-outline-danger" disabled>Delete</button>
+                <a asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancel-event-modal-@Model.Id">Cancel</button>
             }
         </div>
     </div>
 </div>
+
+@if (User.IsInRole("Admin"))
+{
+    var cancelModal = new EventBookingSystem.ViewModels.EventCancelModalViewModel
+    {
+        Id = Model.Id,
+        Name = Model.Name,
+        ModalId = $"cancel-event-modal-{Model.Id}"
+    };
+
+    <partial name="/Views/Events/PartialViews/_CancelEventModal.cshtml"
+             model="cancelModal" />
+}

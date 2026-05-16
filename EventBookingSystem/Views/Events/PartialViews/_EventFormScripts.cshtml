@@ -1,0 +1,68 @@
+<script>
+    (function () {
+        const container = document.getElementById('ticket-types-container');
+        const addButton = document.getElementById('add-ticket-type');
+        const template = document.getElementById('ticket-type-row-template');
+        const form = container?.closest('form');
+
+        if (!container || !addButton || !template) {
+            return;
+        }
+
+        addButton.addEventListener('click', function () {
+            let nextIndex = container?.querySelectorAll('.ticket-type-row').length ?? 0;
+            const index = nextIndex++;
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = template.innerHTML.replaceAll('__index__', index);
+            const row = wrapper.firstElementChild;
+
+            if (!row) {
+                return;
+            }
+
+            container.appendChild(row);
+
+            if (form && window.jQuery?.validator?.unobtrusive) {
+                const $form = window.jQuery(form);
+                $form.removeData('validator');
+                $form.removeData('unobtrusiveValidation');
+                window.jQuery.validator.unobtrusive.parse($form);
+            }
+        });
+
+        container.addEventListener('click', function (event) {
+            const removeButton = event.target.closest('[data-remove-ticket-type]');
+            if (!removeButton) {
+                return;
+            }
+
+            const row = removeButton.closest('.ticket-type-row');
+            if (!row) {
+                return;
+            }
+
+            const idInput = row.querySelector('input[name$=".Id"]');
+            const removeInput = row.querySelector('input[name$=".Remove"]');
+            const id = Number(idInput?.value ?? 0);
+
+            if (id === 0) {
+                row.remove();
+                return;
+            }
+
+            if (removeInput) {
+                removeInput.value = 'true';
+                row.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (!input.name.endsWith(".Remove") && !input.name.endsWith(".Id") && !input.name.endsWith(".HasBookingItems"))
+                    {
+                        input.disabled = true;
+                    }
+                })
+                row.classList.add('d-none');
+                return;
+            }
+
+            row.remove();
+        });
+    })();
+</script>

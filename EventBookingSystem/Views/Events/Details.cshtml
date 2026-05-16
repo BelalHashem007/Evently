@@ -8,6 +8,27 @@
     <a asp-controller="Home" asp-action="Index" class="btn btn-link px-0">&larr; Back to events</a>
 </div>
 
+<!-- Info + Admin buttons-->
+@if (Model.IsCancelled)
+{
+    <div class="alert alert-warning">This event has been cancelled.</div>
+}
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@if (User.IsInRole("Admin") && !Model.IsCancelled)
+{
+    <div class="d-flex gap-2 mb-4">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Edit</a>
+        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancel-event-modal-@Model.Id">Cancel</button>
+    </div>
+}
+
+<!-- Actual page content-->
+
 <section class="mb-4">
     @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
@@ -23,7 +44,7 @@
 
 <div class="mb-4">
     <h1 class="mb-2">@Model.Name</h1>
-    <p class="text-muted mb-0">@Model.Date.ToString("MMMM dd, yyyy")</p>
+    <p class="text-muted mb-0">@(Model.Date.ToString("MMMM dd, yyyy")) | @(Model.Date.ToString("hh:mm")) @(Model.Date.ToString("tt"))</p>
 </div>
 
 <section class="card shadow-sm mb-4">
@@ -70,3 +91,16 @@
         <p class="card-text mb-0">@Model.Venue</p>
     </div>
 </section>
+
+@if (User.IsInRole("Admin") && !Model.IsCancelled)
+{
+    var cancelModal = new EventBookingSystem.ViewModels.EventCancelModalViewModel
+    {
+        Id = Model.Id,
+        Name = Model.Name,
+        ModalId = $"cancel-event-modal-{Model.Id}"
+    };
+
+    <partial name="/Views/Events/PartialViews/_CancelEventModal.cshtml"
+             model="cancelModal" />
+}
