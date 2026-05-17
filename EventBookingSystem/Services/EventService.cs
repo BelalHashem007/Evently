@@ -77,11 +77,30 @@ namespace EventBookingSystem.Services
 
             var ticketTypes = (await unitOfWork.TicketTypes.FindAsync(t => t.EventId == id, ct))
                 .OrderByDescending(t => t.Price)
+                .ToList();
+            var ticketTypeIds = ticketTypes.Select(t => t.Id).ToList();
+            var now = DateTime.UtcNow;
+            var activeBookings = (await unitOfWork.Bookings.FindAsync(b =>
+                    b.EventId == id &&
+                    (b.Status == BookingStatus.Confirmed ||
+                     (b.Status == BookingStatus.Pending && (!b.ExpiresAt.HasValue || b.ExpiresAt > now))), ct))
+                .Select(b => b.Id)
+                .ToHashSet();
+            var bookedQuantities = ticketTypeIds.Count == 0
+                ? new Dictionary<int, int>()
+                : (await unitOfWork.BookingItems.FindAsync(i => ticketTypeIds.Contains(i.TicketTypeId), ct))
+                    .Where(i => activeBookings.Contains(i.BookingId))
+                    .GroupBy(i => i.TicketTypeId)
+                    .ToDictionary(g => g.Key, g => g.Sum(i => i.Quantity));
+
+            var ticketCards = ticketTypes
                 .Select(t => new TicketTypeCardViewModel
                 {
+                    Id = t.Id,
                     Name = t.Name,
                     Price = t.Price,
-                    Quantity = t.Quantity
+                    Quantity = t.Quantity,
+                    AvailableQuantity = Math.Max(0, t.Quantity - bookedQuantities.GetValueOrDefault(t.Id))
                 })
                 .ToList();
 
@@ -94,7 +113,7 @@ namespace EventBookingSystem.Services
                 Description = eventItem.Description,
                 ImageUrl = eventItem.ImageUrl,
                 IsCancelled = eventItem.IsCancelled,
-                TicketTypes = ticketTypes
+                TicketTypes = ticketCards
             };
         }
 

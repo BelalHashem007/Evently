@@ -9,7 +9,7 @@
 <hr />
 <div class="row">
     <div class="col-lg-4 col-md-6">
-        <form asp-action="SignUp" method="post">
+        <form asp-action="SignUp" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
             <div asp-validation-summary="ModelOnly" class="bg-danger"></div>
             <div class="form-group mb-3">
                 <label asp-for="Email" class="control-label"></label>

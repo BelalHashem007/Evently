@@ -104,6 +104,12 @@ namespace EventBookingSystem.Data.Migrations
                     b.Property<int>("EventId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("TotalPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -419,7 +425,7 @@ namespace EventBookingSystem.Data.Migrations
             modelBuilder.Entity("EventBookingSystem.Models.BookingItem", b =>
                 {
                     b.HasOne("EventBookingSystem.Models.Booking", "Booking")
-                        .WithMany()
+                        .WithMany("BookingItems")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -506,6 +512,11 @@ namespace EventBookingSystem.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("EventBookingSystem.Models.Booking", b =>
+                {
+                    b.Navigation("BookingItems");
                 });
 
             modelBuilder.Entity("EventBookingSystem.Models.Event", b =>

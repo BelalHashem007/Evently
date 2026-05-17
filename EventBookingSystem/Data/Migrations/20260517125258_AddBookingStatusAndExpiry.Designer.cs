@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventBookingSystem.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260514122615_test")]
-    partial class test
+    [Migration("20260517125258_AddBookingStatusAndExpiry")]
+    partial class AddBookingStatusAndExpiry
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,6 +105,12 @@ namespace EventBookingSystem.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("EventId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
@@ -422,7 +428,7 @@ namespace EventBookingSystem.Data.Migrations
             modelBuilder.Entity("EventBookingSystem.Models.BookingItem", b =>
                 {
                     b.HasOne("EventBookingSystem.Models.Booking", "Booking")
-                        .WithMany()
+                        .WithMany("BookingItems")
                         .HasForeignKey("BookingId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -509,6 +515,11 @@ namespace EventBookingSystem.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("EventBookingSystem.Models.Booking", b =>
+                {
+                    b.Navigation("BookingItems");
                 });
 
             modelBuilder.Entity("EventBookingSystem.Models.Event", b =>

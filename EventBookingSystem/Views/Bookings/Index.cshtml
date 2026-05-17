@@ -1,0 +1,56 @@
+@model IReadOnlyList<BookingListItemViewModel>
+
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">My Bookings</h1>
+    <p class="text-muted mb-0">Review your event reservations and payment status.</p>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Booking</th>
+                    <th>Event</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th>Expires</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">You do not have any bookings yet.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var booking in Model)
+                    {
+                        <tr>
+                            <td>#@booking.Id</td>
+                            <td>
+                                <div class="fw-semibold">@booking.EventName</div>
+                                <div class="text-muted small">@booking.EventDate.ToString("MMM dd, yyyy hh:mm tt")</div>
+                            </td>
+                            <td>
+                                <span class="badge text-bg-secondary">@booking.Status</span>
+                            </td>
+                            <td>@booking.TotalPrice.ToString("C")</td>
+                            <td>@(booking.ExpiresAt?.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt") ?? "-")</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@booking.Id" class="btn btn-sm btn-outline-primary">View</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

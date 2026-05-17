@@ -1,0 +1,92 @@
+@using EventBookingSystem.Models
+@model BookingDetailsViewModel
+
+@{
+    ViewData["Title"] = $"Booking #{Model.Id}";
+}
+
+<div class="mb-4">
+    <a asp-action="Index" class="btn btn-link px-0">&larr; Back to my bookings</a>
+</div>
+
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Booking #@Model.Id</h1>
+        <p class="text-muted mb-0">@Model.EventName</p>
+    </div>
+    <div class="text-md-end">
+        <span class="badge text-bg-secondary fs-6">@Model.Status</span>
+        <div class="text-muted small mt-2">Created @Model.CreatedDate.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")</div>
+    </div>
+</div>
+
+@if (Model.Status == BookingStatus.Pending)
+{
+    <div class="alert alert-warning">
+        Complete payment before @(Model.ExpiresAt?.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt") ?? "the reservation expires") to keep these tickets.
+    </div>
+}
+else if (Model.Status == BookingStatus.Expired)
+{
+    <div class="alert alert-secondary">
+        This reservation expired. The tickets are available for other users again.
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 card-title mb-3">Order Summary</h2>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Unit Price</th>
+                                <th>Quantity</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>@item.TicketTypeName</td>
+                                    <td>@item.UnitPrice.ToString("C")</td>
+                                    <td>@item.Quantity</td>
+                                    <td class="text-end">@item.TotalPrice.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Total</th>
+                                <th class="text-end">@Model.TotalPrice.ToString("C")</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h2 class="h5 card-title">Event</h2>
+                <p class="mb-1"><strong>Name:</strong> @Model.EventName</p>
+                <p class="mb-1"><strong>Date:</strong> @Model.EventDate.ToString("MMM dd, yyyy hh:mm tt")</p>
+                <p class="mb-0"><strong>Venue:</strong> @Model.Venue</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 card-title">Payment</h2>
+                <p class="text-muted">Stripe checkout will connect here later.</p>
+                <button type="button" class="btn btn-primary w-100" disabled>Proceed to payment</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -16,6 +16,8 @@
     var isSignUpActive = isPublicArea
         && string.Equals(currentController, "Auth", StringComparison.OrdinalIgnoreCase)
         && string.Equals(currentAction, "SignUp", StringComparison.OrdinalIgnoreCase);
+    var isBookingsActive = isPublicArea
+        && string.Equals(currentController, "Bookings", StringComparison.OrdinalIgnoreCase);
     var isAdminActive = string.Equals(currentArea, "Admin", StringComparison.OrdinalIgnoreCase);
 }
 
@@ -57,6 +59,12 @@
                                 {
                                     <li class="nav-item">
                                         <a class="nav-link @(isAdminActive ? "active" : "")" asp-area="Admin" asp-controller="Home" asp-action="Index">Admin</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link @(isBookingsActive ? "active" : "")" asp-area="" asp-controller="Bookings" asp-action="Index">My Bookings</a>
                                     </li>
                                 }
                                 <li class="nav-item">

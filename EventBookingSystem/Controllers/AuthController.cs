@@ -8,15 +8,18 @@ namespace EventBookingSystem.Controllers
     public class AuthController(IAuthService authService) : Controller
     {
         [HttpGet]
-        public IActionResult SignUp()
+        public IActionResult SignUp(string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View("SignUp");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SignUp(SignUpViewModel viewModel)
+        public async Task<IActionResult> SignUp(SignUpViewModel viewModel, string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
             if (!ModelState.IsValid)
             {
                 return View("SignUp", viewModel);
@@ -29,7 +32,7 @@ namespace EventBookingSystem.Controllers
                 return View("SignUp", viewModel);
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToLocal(returnUrl);
         }
 
         [HttpGet]
