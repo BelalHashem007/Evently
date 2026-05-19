@@ -10,5 +10,6 @@ namespace EventBookingSystem.Services.Interfaces
         Task<Result<int>> CreateBookingAsync(CreateBookingViewModel model, int userId, CancellationToken ct = default);
         Task<IReadOnlyList<BookingListItemViewModel>> GetUserBookingsAsync(int userId, CancellationToken ct = default);
         Task<BookingDetailsViewModel?> GetUserBookingDetailsAsync(int bookingId, int userId, CancellationToken ct = default);
+        Task ExpirePendingBookingsAsync(CancellationToken ct = default);
     }
 }

@@ -10,6 +10,7 @@ namespace EventBookingSystem.Repositories
         IBaseRepository<TicketType> ticketTypeRepo,
         IBaseRepository<Booking> bookingRepo,
         IBaseRepository<BookingItem> bookingItemRepo,
+        IBaseRepository<Payment> paymentRepo,
         AppDbContext context,
         ILogger<UnitOfWork> logger
         ) : IUnitOfWork
@@ -18,6 +19,7 @@ namespace EventBookingSystem.Repositories
         public IBaseRepository<TicketType> TicketTypes => ticketTypeRepo;
         public IBaseRepository<Booking> Bookings => bookingRepo;
         public IBaseRepository<BookingItem> BookingItems => bookingItemRepo;
+        public IBaseRepository<Payment> Payments => paymentRepo;
 
         public async Task<int> CompleteAsync(CancellationToken ct)
         {

@@ -15,8 +15,6 @@ namespace EventBookingSystem.Services
 
         public async Task<IReadOnlyList<AdminBookingListItemViewModel>> GetAdminBookingListAsync(CancellationToken ct = default)
         {
-            await ExpirePendingBookingsAsync(ct);
-
             var bookings = (await unitOfWork.Bookings.GetAllAsync(ct))
                 .OrderByDescending(b => b.CreatedDate)
                 .ToList();
@@ -34,6 +32,7 @@ namespace EventBookingSystem.Services
                 .Where(u => userIds.Contains(u.Id))
                 .ToDictionaryAsync(u => u.Id, ct);
 
+            var now = DateTime.UtcNow;
             return bookings
                 .Select(b => new AdminBookingListItemViewModel
                 {
@@ -42,7 +41,7 @@ namespace EventBookingSystem.Services
                     UserName = usersById.TryGetValue(b.UserId, out var user) ? user.UserName ?? user.Email ?? "Unknown user" : "Unknown user",
                     TotalPrice = b.TotalPrice,
                     CreatedDate = b.CreatedDate,
-                    Status = b.Status,
+                    Status = GetEffectiveStatus(b, now),
                     ExpiresAt = b.ExpiresAt
                 })
                 .ToList();
@@ -50,8 +49,6 @@ namespace EventBookingSystem.Services
 
         public async Task<Result<int>> CreateBookingAsync(CreateBookingViewModel model, int userId, CancellationToken ct = default)
         {
-            await ExpirePendingBookingsAsync(ct);
-
             var eventItem = await unitOfWork.Events.GetByIdAsync(model.EventId, ct);
             if (eventItem == null)
             {
@@ -92,13 +89,14 @@ namespace EventBookingSystem.Services
                 }
             }
 
+            var now = DateTime.UtcNow;
             var booking = new Booking
             {
                 UserId = userId,
                 EventId = model.EventId,
-                CreatedDate = DateTime.UtcNow,
+                CreatedDate = now,
                 Status = BookingStatus.Pending,
-                ExpiresAt = DateTime.UtcNow.Add(PendingBookingLifetime)
+                ExpiresAt = now.Add(PendingBookingLifetime)
             };
 
             foreach (var (ticketTypeId, quantity) in requestedTickets)
@@ -123,8 +121,6 @@ namespace EventBookingSystem.Services
 
         public async Task<IReadOnlyList<BookingListItemViewModel>> GetUserBookingsAsync(int userId, CancellationToken ct = default)
         {
-            await ExpirePendingBookingsAsync(ct);
-
             var bookings = (await unitOfWork.Bookings.FindAsync(b => b.UserId == userId, ct))
                 .OrderByDescending(b => b.CreatedDate)
                 .ToList();
@@ -138,13 +134,14 @@ namespace EventBookingSystem.Services
             var eventsById = (await unitOfWork.Events.FindAsync(e => eventIds.Contains(e.Id), ct))
                 .ToDictionary(e => e.Id);
 
+            var now = DateTime.UtcNow;
             return bookings
                 .Select(b => new BookingListItemViewModel
                 {
                     Id = b.Id,
                     EventName = eventsById.TryGetValue(b.EventId, out var eventItem) ? eventItem.Name : "Unknown event",
                     EventDate = eventsById.TryGetValue(b.EventId, out eventItem) ? eventItem.Date : default,
-                    Status = b.Status,
+                    Status = GetEffectiveStatus(b, now),
                     CreatedDate = b.CreatedDate,
                     ExpiresAt = b.ExpiresAt,
                     TotalPrice = b.TotalPrice
@@ -154,8 +151,6 @@ namespace EventBookingSystem.Services
 
         public async Task<BookingDetailsViewModel?> GetUserBookingDetailsAsync(int bookingId, int userId, CancellationToken ct = default)
         {
-            await ExpirePendingBookingsAsync(ct);
-
             var booking = await unitOfWork.Bookings.GetByIdAsync(bookingId, ct);
             if (booking == null || booking.UserId != userId)
             {
@@ -170,13 +165,14 @@ namespace EventBookingSystem.Services
                 : (await unitOfWork.TicketTypes.FindAsync(t => ticketTypeIds.Contains(t.Id), ct))
                     .ToDictionary(t => t.Id);
 
+            var now = DateTime.UtcNow;
             return new BookingDetailsViewModel
             {
                 Id = booking.Id,
                 EventName = eventItem?.Name ?? "Unknown event",
                 EventDate = eventItem?.Date ?? default,
                 Venue = eventItem?.Venue ?? "Unknown venue",
-                Status = booking.Status,
+                Status = GetEffectiveStatus(booking, now),
                 CreatedDate = booking.CreatedDate,
                 ExpiresAt = booking.ExpiresAt,
                 TotalPrice = booking.TotalPrice,
@@ -196,7 +192,7 @@ namespace EventBookingSystem.Services
             };
         }
 
-        private async Task ExpirePendingBookingsAsync(CancellationToken ct)
+        public async Task ExpirePendingBookingsAsync(CancellationToken ct = default)
         {
             var now = DateTime.UtcNow;
             var expiredBookings = await unitOfWork.Bookings.FindAsync(b =>
@@ -216,6 +212,15 @@ namespace EventBookingSystem.Services
             }
 
             await unitOfWork.TryCompeleteAsync(ct);
+        }
+
+        private static BookingStatus GetEffectiveStatus(Booking booking, DateTime now)
+        {
+            return booking.Status == BookingStatus.Pending &&
+                   booking.ExpiresAt.HasValue &&
+                   booking.ExpiresAt <= now
+                ? BookingStatus.Expired
+                : booking.Status;
         }
 
         private async Task<Dictionary<int, int>> GetActiveBookedQuantitiesAsync(IEnumerable<int> ticketTypeIds, int eventId, CancellationToken ct)

@@ -17,6 +17,11 @@ namespace EventBookingSystem.Repositories
             return await context.Set<T>().Where(predicate).ToListAsync(ct);
         }
 
+        public async Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default)
+        {
+            return await context.Set<T>().SingleOrDefaultAsync(predicate, ct);
+        }
+
         public async Task<T?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             return await context.Set<T>().FindAsync(id, ct);

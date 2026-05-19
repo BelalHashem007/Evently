@@ -9,6 +9,7 @@ namespace EventBookingSystem.Repositories.Interfaces
         public IBaseRepository<TicketType> TicketTypes { get; }
         public IBaseRepository<Booking> Bookings { get; }
         public IBaseRepository<BookingItem> BookingItems { get; }
+        public IBaseRepository<Payment> Payments { get; }
         public Task<int> CompleteAsync(CancellationToken ct = default);
         public Task<Result> TryCompeleteAsync(CancellationToken ct);
     }

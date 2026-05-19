@@ -20,6 +20,15 @@
     </div>
 </div>
 
+@if (TempData.Peek("StripeError") != null)
+{
+    <div class="alert alert-dismissible alert-warning">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <h4 class="alert-heading">Warning!</h4>
+        <p class="mb-0">@TempData["StripeError"]</p>
+    </div>
+}
+
 @if (Model.Status == BookingStatus.Pending)
 {
     <div class="alert alert-warning">
@@ -85,7 +94,17 @@ else if (Model.Status == BookingStatus.Expired)
             <div class="card-body">
                 <h2 class="h5 card-title">Payment</h2>
                 <p class="text-muted">Stripe checkout will connect here later.</p>
-                <button type="button" class="btn btn-primary w-100" disabled>Proceed to payment</button>
+                @if(Model.ExpiresAt > DateTime.UtcNow) 
+                {
+                    <form asp-controller="Payments" asp-action="CheckOut" asp-area="" method="post">
+                        <input type="hidden" asp-for="@Model.Id" name="bookingId"/>
+                        <button type="submit" class="btn btn-primary w-100">Proceed to payment</button>
+                    </form>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary w-100" disabled>Booking Expired</button>
+                }
             </div>
         </div>
     </div>

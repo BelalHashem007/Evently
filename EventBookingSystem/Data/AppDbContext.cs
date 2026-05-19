@@ -16,6 +16,11 @@ namespace EventBookingSystem.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            //payment constraint
+            modelBuilder.Entity<Payment>()
+                .HasIndex(p => p.StripeSessionId)
+                .IsUnique();
+
             //make the ondelete behavior to no action for all relationships to prevent cascade delete
             foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
             {
