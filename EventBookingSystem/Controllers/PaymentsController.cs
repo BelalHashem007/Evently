@@ -1,4 +1,5 @@
-﻿using EventBookingSystem.Services.Interfaces;
+﻿using EventBookingSystem.Extensions;
+using EventBookingSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,32 +11,35 @@ namespace EventBookingSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CheckOut(int bookingId)
+        public async Task<IActionResult> CheckOut(int bookingId, CancellationToken ct)
         {
-            var successUrl = linkGenerator.GetUriByAction(nameof(Success), "Payments", null, HttpContext.Request.Scheme, HttpContext.Request.Host);
-            var cancelUrl = linkGenerator.GetUriByAction(nameof(Cancel), "Payments", null, HttpContext.Request.Scheme, HttpContext.Request.Host);
+            var routeValues = new { bookingId };
+            var successUrl = linkGenerator.GetUriByAction(nameof(Success), "Payments", routeValues, HttpContext.Request.Scheme, HttpContext.Request.Host);
+            var cancelUrl = linkGenerator.GetUriByAction(nameof(Cancel), "Payments", routeValues, HttpContext.Request.Scheme, HttpContext.Request.Host);
 
-            var result = await paymentService.GetStripeSessionAsync(bookingId, successUrl, cancelUrl);
+            var result = await paymentService.GetStripeSessionAsync(bookingId, User.GetCurrentUserId(), successUrl!, cancelUrl!, ct);
 
             if (!result.Succeeded || result.Value == null)
             {
                 TempData["StripeError"] = result.ErrorMessage ?? "Unknown Error";
-                return RedirectToAction("Details", "Bookings", new { Id = bookingId});
+                return RedirectToAction("Details", "Bookings", new { id = bookingId});
             }
 
             return Redirect(result.Value.Url);
         }
 
         [HttpGet]
-        public IActionResult Success()
+        public IActionResult Success(int bookingId)
         {
-            return Ok("Payment Success");
+            TempData["StripeMessage"] = "Payment received. Your booking will update once Stripe confirms it.";
+            return RedirectToAction("Details", "Bookings", new { id = bookingId });
         }
 
         [HttpGet]
-        public IActionResult Cancel()
+        public IActionResult Cancel(int bookingId)
         {
-            return Ok("Payment Cancelled");
+            TempData["StripeError"] = "Payment was cancelled. You can try again before the reservation expires.";
+            return RedirectToAction("Details", "Bookings", new { id = bookingId });
         }
     }
 }

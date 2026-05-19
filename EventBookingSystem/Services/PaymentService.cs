@@ -10,12 +10,13 @@ namespace EventBookingSystem.Services
 {
     public class PaymentService(IConfiguration config, IUnitOfWork unitOfWork, ILogger<PaymentService> logger) : IPaymentService
     {
-        public async Task<Result<Session>> GetStripeSessionAsync(int bookingId, string successUrl, string cancelUrl)
+        public async Task<Result<Session>> GetStripeSessionAsync(int bookingId, int userId, string successUrl, string cancelUrl, CancellationToken ct = default)
         {
             //prepare stripekeys + ticket prices + quantity
             var booking = await unitOfWork.Bookings.FindOneAsync(b => b.Id == bookingId 
+                                                                && b.UserId == userId
                                                                 && b.Status == BookingStatus.Pending
-                                                                && b.ExpiresAt >= DateTime.UtcNow);
+                                                                && b.ExpiresAt >= DateTime.UtcNow, ct);
             if (booking is null)
                 return Result<Session>.Failure("Booking does not exist or expired!");
 
@@ -23,9 +24,9 @@ namespace EventBookingSystem.Services
             if (stripeKeys is null)
                 return Result<Session>.Failure("Failed to read stripe keys from configuration.");
 
-            var bookingItems = await unitOfWork.BookingItems.FindAsync(i => i.BookingId == bookingId);
+            var bookingItems = await unitOfWork.BookingItems.FindAsync(i => i.BookingId == bookingId, ct);
             var bookingItemsTicketTypesIds = bookingItems.Select(i => i.TicketTypeId);
-            var tickets = (await unitOfWork.TicketTypes.FindAsync(t => bookingItemsTicketTypesIds.Contains(t.Id)))
+            var tickets = (await unitOfWork.TicketTypes.FindAsync(t => bookingItemsTicketTypesIds.Contains(t.Id), ct))
                           .ToDictionary(t => t.Id);
 
             //start adding tickets to checkout
@@ -59,13 +60,17 @@ namespace EventBookingSystem.Services
                 Metadata = new Dictionary<string, string> { {"bookingId", bookingId.ToString() } },
                 
             };
+            var requestOptions = new RequestOptions
+            {
+                IdempotencyKey = $"checkout-booking-{bookingId}"
+            };
 
             //create session and log + failure if exception happens
             try
             {
                 var client = new StripeClient(apiKey: stripeKeys.SecretKey);
                 var service = client.V1.Checkout.Sessions;
-                Session session = await service.CreateAsync(options, new Reqquest);
+                Session session = await service.CreateAsync(options, requestOptions, ct);
                 return Result<Session>.Success(session);
             }
             catch (Exception e)

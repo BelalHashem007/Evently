@@ -5,6 +5,6 @@ namespace EventBookingSystem.Services.Interfaces
 {
     public interface IPaymentService
     {
-        public Task<Result<Session>> GetStripeSessionAsync(int bookingId, string sucessUrl, string cancelUrl);
+        public Task<Result<Session>> GetStripeSessionAsync(int bookingId, int userId, string successUrl, string cancelUrl, CancellationToken ct = default);
     }
 }

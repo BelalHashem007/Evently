@@ -29,6 +29,14 @@
     </div>
 }
 
+@if (TempData.Peek("StripeMessage") != null)
+{
+    <div class="alert alert-dismissible alert-info">
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <p class="mb-0">@TempData["StripeMessage"]</p>
+    </div>
+}
+
 @if (Model.Status == BookingStatus.Pending)
 {
     <div class="alert alert-warning">
@@ -93,16 +101,21 @@ else if (Model.Status == BookingStatus.Expired)
         <div class="card shadow-sm">
             <div class="card-body">
                 <h2 class="h5 card-title">Payment</h2>
-                <p class="text-muted">Stripe checkout will connect here later.</p>
-                @if(Model.ExpiresAt > DateTime.UtcNow) 
+                @if (Model.Status == BookingStatus.Pending && Model.ExpiresAt > DateTime.UtcNow)
                 {
+                    <p class="text-muted">Pay securely with Stripe before this reservation expires.</p>
                     <form asp-controller="Payments" asp-action="CheckOut" asp-area="" method="post">
-                        <input type="hidden" asp-for="@Model.Id" name="bookingId"/>
+                        <input type="hidden" name="bookingId" value="@Model.Id"/>
                         <button type="submit" class="btn btn-primary w-100">Proceed to payment</button>
                     </form>
                 }
+                else if (Model.Status == BookingStatus.Confirmed)
+                {
+                    <p class="text-success mb-0">Payment confirmed. Your booking is complete.</p>
+                }
                 else
                 {
+                    <p class="text-muted">Payment is no longer available for this booking.</p>
                     <button type="button" class="btn btn-primary w-100" disabled>Booking Expired</button>
                 }
             </div>

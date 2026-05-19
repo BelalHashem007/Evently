@@ -14,7 +14,7 @@ namespace EventBookingSystem.Api.Controllers
             if (!Request.Headers.TryGetValue("Stripe-Signature", out var signatureHeader))
                 return BadRequest();
 
-            var result = await webhookService.UpdateBooking(body, signatureHeader, ct);
+            var result = await webhookService.UpdateBooking(body, signatureHeader.ToString(), ct);
 
             if (result.ErrorMessage == "Stripe Error")
                 return BadRequest();
