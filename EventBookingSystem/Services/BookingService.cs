@@ -192,6 +192,39 @@ namespace EventBookingSystem.Services
             };
         }
 
+        public async Task<Result<BookingStatus>> GetUserBookingStatusAsync(int bookingId, int userId, CancellationToken ct = default)
+        {
+            var booking = await unitOfWork.Bookings.GetByIdAsync(bookingId, ct);
+            if (booking == null || booking.UserId != userId)
+            {
+                return Result<BookingStatus>.Failure("Booking was not found.");
+            }
+
+            return Result<BookingStatus>.Success(GetEffectiveStatus(booking, DateTime.UtcNow));
+        }
+
+        public async Task<Result> CancelUserBookingAsync(int bookingId, int userId, CancellationToken ct = default)
+        {
+            var booking = await unitOfWork.Bookings.GetByIdAsync(bookingId, ct);
+            if (booking == null || booking.UserId != userId)
+            {
+                return Result.Failure("Booking was not found.");
+            }
+
+            if (GetEffectiveStatus(booking, DateTime.UtcNow) != BookingStatus.Pending)
+            {
+                return Result.Failure("Only pending bookings can be cancelled.");
+            }
+
+            booking.Status = BookingStatus.Cancelled;
+            unitOfWork.Bookings.Update(booking);
+
+            var dbResult = await unitOfWork.TryCompeleteAsync(ct);
+            return dbResult.Succeeded
+                ? Result.Success()
+                : Result.Failure(dbResult.ErrorMessage ?? "Could not cancel booking.");
+        }
+
         public async Task ExpirePendingBookingsAsync(CancellationToken ct = default)
         {
             var now = DateTime.UtcNow;

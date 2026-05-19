@@ -10,9 +10,10 @@ namespace EventBookingSystem.Services
 {
     public class PaymentService(IConfiguration config, IUnitOfWork unitOfWork, ILogger<PaymentService> logger) : IPaymentService
     {
+        private const string PaymentCurrency = "egp";
+
         public async Task<Result<Session>> GetStripeSessionAsync(int bookingId, int userId, string successUrl, string cancelUrl, CancellationToken ct = default)
         {
-            //prepare stripekeys + ticket prices + quantity
             var booking = await unitOfWork.Bookings.FindOneAsync(b => b.Id == bookingId 
                                                                 && b.UserId == userId
                                                                 && b.Status == BookingStatus.Pending
@@ -29,7 +30,6 @@ namespace EventBookingSystem.Services
             var tickets = (await unitOfWork.TicketTypes.FindAsync(t => bookingItemsTicketTypesIds.Contains(t.Id), ct))
                           .ToDictionary(t => t.Id);
 
-            //start adding tickets to checkout
             var lineItems = new List<SessionLineItemOptions>();
             foreach (var item in bookingItems)
             {
@@ -39,8 +39,8 @@ namespace EventBookingSystem.Services
                     Quantity = item.Quantity,
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        Currency = "egp",
-                        UnitAmount = (long)(ticket.Price * 100),
+                        Currency = PaymentCurrency,
+                        UnitAmount = ToStripeAmount(item.TotalPrice / item.Quantity),
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
                             Name = ticket.Name,
@@ -50,22 +50,24 @@ namespace EventBookingSystem.Services
                 lineItems.Add(itemOptions);
             }
 
-            //finish checkout options
             var options = new SessionCreateOptions
             {
                 SuccessUrl = successUrl,
                 CancelUrl = cancelUrl,
                 Mode = "payment",
                 LineItems = lineItems,
-                Metadata = new Dictionary<string, string> { {"bookingId", bookingId.ToString() } },
-                
+                Metadata = new Dictionary<string, string>
+                {
+                    { "bookingId", bookingId.ToString() },
+                    { "expectedAmount", ToStripeAmount(booking.TotalPrice).ToString() },
+                    { "currency", PaymentCurrency }
+                },
             };
             var requestOptions = new RequestOptions
             {
                 IdempotencyKey = $"checkout-booking-{bookingId}"
             };
 
-            //create session and log + failure if exception happens
             try
             {
                 var client = new StripeClient(apiKey: stripeKeys.SecretKey);
@@ -80,5 +82,9 @@ namespace EventBookingSystem.Services
             }
         }
 
+        private static long ToStripeAmount(decimal amount)
+        {
+            return (long)Math.Round(amount * 100, MidpointRounding.AwayFromZero);
+        }
     }
 }

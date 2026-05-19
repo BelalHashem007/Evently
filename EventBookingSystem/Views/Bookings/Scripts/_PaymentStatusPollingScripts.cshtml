@@ -1,0 +1,51 @@
+<script>
+    (function () {
+        const poller = document.querySelector('[data-payment-status-poller]');
+        if (!poller) {
+            return;
+        }
+
+        const statusUrl = poller.dataset.statusUrl;
+        const maxAttempts = Number(poller.dataset.maxAttempts ?? 3);
+        const delayMs = Number(poller.dataset.delayMs ?? 2000);
+        const message = poller.querySelector('[data-payment-status-message]');
+
+        if (!statusUrl || maxAttempts <= 0) {
+            return;
+        }
+
+        const wait = ms => new Promise(resolve => window.setTimeout(resolve, ms));
+
+        async function pollPaymentStatus() {
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                await wait(delayMs);
+
+                const response = await fetch(statusUrl, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    continue;
+                }
+
+                const result = await response.json();
+                if (result.isConfirmed) {
+                    window.location.reload();
+                    return;
+                }
+            }
+
+            if (message) {
+                message.textContent = 'Payment is still processing. Refresh this page in a moment.';
+            }
+        }
+
+        pollPaymentStatus().catch(function () {
+            if (message) {
+                message.textContent = 'Payment is still processing. Refresh this page in a moment.';
+            }
+        });
+    })();
+</script>

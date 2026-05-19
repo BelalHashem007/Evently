@@ -12,6 +12,8 @@ namespace EventBookingSystem.Services
 {
     public class WebhookService(IConfiguration config, IUnitOfWork unitOfWork, ILogger<WebhookService> logger) : IWebhookService
     {
+        private const string PaymentCurrency = "egp";
+
         public async Task<Result> UpdateBooking(string body, string signatureHeader, CancellationToken ct)
         {
             var stripeKeys = config.GetSection("Stripe").Get<StripeKeys>();
@@ -49,18 +51,43 @@ namespace EventBookingSystem.Services
                 return Result.Success();
 
             if (!TryGetBookingId(session, out var bookingId))
-                return Result.Failure("Invalid bookingId");
+            {
+                logger.LogWarning("Stripe session {SessionId} is missing a valid booking id", session.Id);
+                return Result.Success();
+            }
 
-            var existingPayment = await unitOfWork.Payments.FindOneAsync(p => p.StripeSessionId == session.Id);
+            var existingPayment = await unitOfWork.Payments.FindOneAsync(p => p.StripeSessionId == session.Id, ct);
             if (existingPayment is not null)
                 return Result.Success();
 
-            var booking = await unitOfWork.Bookings.GetByIdAsync(bookingId);
+            var booking = await unitOfWork.Bookings.GetByIdAsync(bookingId, ct);
             if (booking is null)
-                return Result.Failure("Booking does not exist");
+            {
+                logger.LogWarning("Stripe session {SessionId} references missing booking {BookingId}", session.Id, bookingId);
+                return Result.Success();
+            }
 
-            if (booking.Status != BookingStatus.Pending || booking.ExpiresAt < DateTime.UtcNow)
-                return Result.Failure("Booking is not pending or expired.");
+            if (!IsPaidAmountValid(session, booking))
+            {
+                logger.LogWarning(
+                    "Stripe session {SessionId} amount mismatch for booking {BookingId}. Expected {ExpectedAmount} {ExpectedCurrency}, received {ReceivedAmount} {ReceivedCurrency}",
+                    session.Id,
+                    booking.Id,
+                    ToStripeAmount(booking.TotalPrice),
+                    PaymentCurrency,
+                    session.AmountTotal,
+                    session.Currency);
+                return Result.Success();
+            }
+
+            if (booking.Status == BookingStatus.Confirmed)
+                return Result.Success();
+
+            if (booking.Status != BookingStatus.Pending && booking.Status != BookingStatus.Expired)
+            {
+                logger.LogWarning("Stripe session {SessionId} paid for booking {BookingId} with invalid status {Status}", session.Id, booking.Id, booking.Status);
+                return Result.Success();
+            }
 
             return await ConfirmBookingAsync(booking, session, ct);
         }
@@ -71,6 +98,17 @@ namespace EventBookingSystem.Services
 
             return session.Metadata.TryGetValue("bookingId", out var value)
                 && int.TryParse(value, out bookingId);
+        }
+
+        private static bool IsPaidAmountValid(Session session, Booking booking)
+        {
+            return session.AmountTotal == ToStripeAmount(booking.TotalPrice)
+                && string.Equals(session.Currency, PaymentCurrency, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static long ToStripeAmount(decimal amount)
+        {
+            return (long)Math.Round(amount * 100, MidpointRounding.AwayFromZero);
         }
 
         private async Task<Result> ConfirmBookingAsync(Booking booking, Session session, CancellationToken ct)

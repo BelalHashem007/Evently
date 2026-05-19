@@ -32,6 +32,7 @@ namespace EventBookingSystem.Controllers
         public IActionResult Success(int bookingId)
         {
             TempData["StripeMessage"] = "Payment received. Your booking will update once Stripe confirms it.";
+            TempData["PollPaymentStatus"] = "true";
             return RedirectToAction("Details", "Bookings", new { id = bookingId });
         }
 

@@ -38,7 +38,7 @@
                             <td>#@booking.Id</td>
                             <td>@booking.EventName</td>
                             <td>@booking.UserName</td>
-                            <td><span class="badge text-bg-secondary">@booking.Status</span></td>
+                            <td><span class="badge @BookingStatusUi.BadgeClass(booking.Status)">@booking.Status</span></td>
                             <td>@booking.TotalPrice.ToString("C")</td>
                             <td>@(booking.ExpiresAt?.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt") ?? "-")</td>
                             <td>@booking.CreatedDate.ToString("MMM dd, yyyy")</td>

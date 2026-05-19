@@ -1,4 +1,5 @@
 using EventBookingSystem.Extensions;
+using EventBookingSystem.Models;
 using EventBookingSystem.Services.Interfaces;
 using EventBookingSystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +28,23 @@ namespace EventBookingSystem.Controllers
             }
 
             return View(booking);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Status(int id, CancellationToken ct)
+        {
+            var result = await bookingService.GetUserBookingStatusAsync(id, User.GetCurrentUserId(), ct);
+            if (!result.Succeeded)
+            {
+                return NotFound();
+            }
+
+            return Json(new
+            {
+                status = result.Value.ToString(),
+                isConfirmed = result.Value == BookingStatus.Confirmed
+            });
         }
 
         [HttpPost]
@@ -58,6 +76,22 @@ namespace EventBookingSystem.Controllers
             }
 
             return RedirectToAction(nameof(Details), new { id = result.Value });
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id, CancellationToken ct)
+        {
+            var result = await bookingService.CancelUserBookingAsync(id, User.GetCurrentUserId(), ct);
+            if (!result.Succeeded)
+            {
+                TempData["BookingError"] = result.ErrorMessage ?? "Could not cancel booking.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            TempData["BookingMessage"] = "Booking cancelled successfully.";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
     }
