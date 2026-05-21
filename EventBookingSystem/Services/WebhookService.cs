@@ -1,8 +1,11 @@
 ﻿using EventBookingSystem.Common.Results;
 using EventBookingSystem.Configuration;
+using EventBookingSystem.DomainEvents.Dispatcher;
+using EventBookingSystem.DomainEvents.Events;
 using EventBookingSystem.Models;
 using EventBookingSystem.Repositories.Interfaces;
 using EventBookingSystem.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
@@ -10,7 +13,13 @@ using Stripe.Checkout;
 
 namespace EventBookingSystem.Services
 {
-    public class WebhookService(IConfiguration config, IUnitOfWork unitOfWork, ILogger<WebhookService> logger) : IWebhookService
+    public class WebhookService(
+        IConfiguration config,
+        IUnitOfWork unitOfWork,
+        ILogger<WebhookService> logger,
+        IEventDispatcher eventDispatcher,
+        UserManager<ApplicationUser> userManager
+        ) : IWebhookService
     {
         private const string PaymentCurrency = "egp";
 
@@ -60,7 +69,7 @@ namespace EventBookingSystem.Services
             if (existingPayment is not null)
                 return Result.Success();
 
-            var booking = await unitOfWork.Bookings.GetByIdAsync(bookingId, ct);
+            var booking = await unitOfWork.Bookings.GetBookingWithBookingItemsById(bookingId, ct);
             if (booking is null)
             {
                 logger.LogWarning("Stripe session {SessionId} references missing booking {BookingId}", session.Id, bookingId);
@@ -125,6 +134,17 @@ namespace EventBookingSystem.Services
             try
             {
                 await unitOfWork.CompleteAsync(ct);
+                var eventItem = await unitOfWork.Events.GetByIdAsync(booking.EventId);
+                var user = await userManager.FindByIdAsync(booking.UserId.ToString());
+                await eventDispatcher.PublishAsync(new BookingConfirmedEvent(
+                    booking.Id,
+                    user.Email,
+                    eventItem.Name,
+                    eventItem.Date,
+                    eventItem.Venue,
+                    booking.BookingItems.Sum(i => i.Quantity),
+                    booking.TotalPrice
+                    ));
                 return Result.Success();
             }
             catch (DbUpdateException e) when (IsDuplicateStripeSessionException(e))

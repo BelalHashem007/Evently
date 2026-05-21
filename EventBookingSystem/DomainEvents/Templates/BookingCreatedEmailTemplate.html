@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fb;
+            color: #1f2937;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+        }
+
+        .email-wrapper {
+            width: 100%;
+            padding: 32px 16px;
+            box-sizing: border-box;
+        }
+
+        .email-card {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .email-header {
+            padding: 32px 28px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .app-name {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .header-description {
+            margin: 10px 0 0;
+            font-size: 15px;
+            color: #dbeafe;
+        }
+
+        .email-body {
+            padding: 32px 28px;
+        }
+
+        .email-title {
+            margin: 0 0 12px;
+            font-size: 22px;
+            color: #111827;
+        }
+
+        .email-text {
+            margin: 0 0 24px;
+            font-size: 16px;
+            color: #4b5563;
+        }
+
+        .booking-link {
+            display: inline-block;
+            padding: 14px 22px;
+            background-color: #2563eb;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .fallback-link {
+            margin-top: 24px;
+            font-size: 13px;
+            color: #6b7280;
+            word-break: break-all;
+        }
+
+        .email-footer {
+            padding: 20px 28px;
+            background-color: #f9fafb;
+            color: #6b7280;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        @media only screen and (max-width: 480px) {
+            .email-wrapper {
+                padding: 16px 8px;
+            }
+
+            .email-header,
+            .email-body,
+            .email-footer {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .app-name {
+                font-size: 24px;
+            }
+
+            .booking-link {
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        <div class="email-card">
+            <div class="email-header">
+                <h1 class="app-name">Event Booking System</h1>
+                <p class="header-description">Your simple place to discover events and manage your bookings.</p>
+            </div>
+
+            <div class="email-body">
+                <h2 class="email-title">Your booking is ready</h2>
+                <p class="email-text">
+                    Thanks for booking with Event Booking System. You can view your booking details and keep track of your reservation from the link below.
+                </p>
+
+                <a class="booking-link" href="[SiteUrl]/bookings/details/[BookingId]">
+                    View Booking Details
+                </a>
+
+                <p class="fallback-link">
+                    If the button does not work, copy and paste this link into your browser:
+                    [SiteUrl]/bookings/details/[BookingId]
+                </p>
+            </div>
+
+            <div class="email-footer">
+                You received this email because a booking was created using Event Booking System.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

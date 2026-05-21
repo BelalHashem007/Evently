@@ -1,4 +1,8 @@
+using EventBookingSystem.Configuration;
 using EventBookingSystem.Data;
+using EventBookingSystem.DomainEvents.Dispatcher;
+using EventBookingSystem.DomainEvents.Handlers;
+using EventBookingSystem.DomainEvents.Events;
 using EventBookingSystem.Exceptions;
 using EventBookingSystem.Middlewares;
 using EventBookingSystem.Models;
@@ -31,6 +35,7 @@ namespace EventBookingSystem
                 options.SupportedCultures = [egpCulture];
                 options.SupportedUICultures = [egpCulture];
             });
+            builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 
             // Add services to the container.
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -40,9 +45,11 @@ namespace EventBookingSystem
             builder.Services.AddHostedService<BookingExpiryHostedService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IEmailService, EmailSerivce>();
             builder.Services.AddScoped<IWebhookService, WebhookService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            builder.Services.AddScoped<IBookingRepository, BookingRepository>();
             builder.Services.AddScoped<IdentitySeeder>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -63,6 +70,11 @@ namespace EventBookingSystem
             {
                 options.LoginPath = "/auth/login";
             });
+
+            //domain event
+            builder.Services.AddScoped<IEventHandler<BookingCreatedEvent>, BookingCreatedEmailHandler>();
+            builder.Services.AddScoped<IEventHandler<BookingConfirmedEvent>, BookingConfirmedEmailHandler>();
+            builder.Services.AddScoped<IEventDispatcher, EventDispatcher>();
 
             var app = builder.Build();
 

@@ -1,15 +1,18 @@
 using EventBookingSystem.Areas.Admin.ViewModels;
 using EventBookingSystem.Common.Results;
+using EventBookingSystem.DomainEvents.Dispatcher;
+using EventBookingSystem.DomainEvents.Events;
 using EventBookingSystem.Models;
 using EventBookingSystem.Repositories.Interfaces;
 using EventBookingSystem.Services.Interfaces;
 using EventBookingSystem.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace EventBookingSystem.Services
 {
-    public class BookingService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager) : IBookingService
+    public class BookingService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IEventDispatcher eventDispatcher) : IBookingService
     {
         private static readonly TimeSpan PendingBookingLifetime = TimeSpan.FromMinutes(15);
 
@@ -114,6 +117,10 @@ namespace EventBookingSystem.Services
 
             await unitOfWork.Bookings.AddAsync(booking, ct);
             var dbResult = await unitOfWork.TryCompeleteAsync(ct);
+
+            var user = await userManager.FindByIdAsync(userId.ToString());
+            await eventDispatcher.PublishAsync(new BookingCreatedEvent(booking.Id, user.Email, eventItem.Name));
+
             return dbResult.Succeeded
                 ? Result<int>.Success(booking.Id)
                 : Result<int>.Failure(dbResult.ErrorMessage ?? "Could not create booking.");

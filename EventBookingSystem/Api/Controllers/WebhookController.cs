@@ -1,4 +1,5 @@
-﻿using EventBookingSystem.Services.Interfaces;
+﻿using EventBookingSystem.Extensions;
+using EventBookingSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventBookingSystem.Api.Controllers

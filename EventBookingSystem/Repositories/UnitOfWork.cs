@@ -8,7 +8,7 @@ namespace EventBookingSystem.Repositories
     public class UnitOfWork(
         IBaseRepository<Event> eventRepo,
         IBaseRepository<TicketType> ticketTypeRepo,
-        IBaseRepository<Booking> bookingRepo,
+        IBookingRepository bookingRepo,
         IBaseRepository<BookingItem> bookingItemRepo,
         IBaseRepository<Payment> paymentRepo,
         AppDbContext context,
@@ -17,7 +17,7 @@ namespace EventBookingSystem.Repositories
     {
         public IBaseRepository<Event> Events => eventRepo;
         public IBaseRepository<TicketType> TicketTypes => ticketTypeRepo;
-        public IBaseRepository<Booking> Bookings => bookingRepo;
+        public IBookingRepository Bookings => bookingRepo;
         public IBaseRepository<BookingItem> BookingItems => bookingItemRepo;
         public IBaseRepository<Payment> Payments => paymentRepo;
 
