@@ -2,6 +2,6 @@
 {
     public interface IEventDispatcher
     {
-        Task PublishAsync<TEvent>(TEvent @event);
+        ValueTask PublishAsync<TEvent>(TEvent @event, CancellationToken ct = default);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using EventBookingSystem.Common.Results;
+using System.Security.Claims;
 
 namespace EventBookingSystem.Services.Interfaces
 {

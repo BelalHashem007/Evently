@@ -2,6 +2,7 @@
 using EventBookingSystem.Services.Interfaces;
 using EventBookingSystem.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace EventBookingSystem.Services
 {

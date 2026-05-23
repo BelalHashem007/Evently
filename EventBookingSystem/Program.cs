@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
+using EventBookingSystem.BackgroundJobs;
 
 namespace EventBookingSystem
 {
@@ -42,7 +43,6 @@ namespace EventBookingSystem
             builder.Services.AddScoped<IEventService, EventService>();
             builder.Services.AddScoped<IDashboardService, DashboardService>();
             builder.Services.AddScoped<IBookingService, BookingService>();
-            builder.Services.AddHostedService<BookingExpiryHostedService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IEmailService, EmailSerivce>();
@@ -70,6 +70,11 @@ namespace EventBookingSystem
             {
                 options.LoginPath = "/auth/login";
             });
+
+            //hosted services
+            builder.Services.AddHostedService<BookingExpiryHostedService>();
+            builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            builder.Services.AddHostedService<DomainEventHostedService>();
 
             //domain event
             builder.Services.AddScoped<IEventHandler<BookingCreatedEvent>, BookingCreatedEmailHandler>();

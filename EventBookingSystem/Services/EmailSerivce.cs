@@ -14,7 +14,7 @@ namespace EventBookingSystem.Services
         {
             _mailSettings = mailSettings.Value;
         }
-        public async Task SendEmailAsync(string mailTo, string subject, string body, IList<IFormFile>? attachments = null)
+        public async Task SendEmailAsync(string mailTo, string subject, string body, IList<IFormFile>? attachments = null, CancellationToken ct = default)
         {
             var email = new MimeMessage();
             email.Subject = subject;
@@ -33,7 +33,7 @@ namespace EventBookingSystem.Services
                     if (file.Length > 0)
                     {
                         using var ms = new MemoryStream();
-                        await file.CopyToAsync(ms);
+                        await file.CopyToAsync(ms, ct);
                         fileBytes = ms.ToArray();
 
                         bb.Attachments.Add(file.FileName, fileBytes, ContentType.Parse(file.ContentType));
@@ -45,11 +45,11 @@ namespace EventBookingSystem.Services
             email.Body = bb.ToMessageBody();
 
             using var smtp = new SmtpClient();
-            await smtp.ConnectAsync(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(_mailSettings.Email, _mailSettings.Password);
-            await smtp.SendAsync(email);
+            await smtp.ConnectAsync(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls, ct);
+            await smtp.AuthenticateAsync(_mailSettings.Email, _mailSettings.Password, ct);
+            await smtp.SendAsync(email, ct);
 
-            await smtp.DisconnectAsync(true);
+            await smtp.DisconnectAsync(true, ct);
         }
     }
 }

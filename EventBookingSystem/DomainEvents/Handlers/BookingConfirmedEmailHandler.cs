@@ -12,7 +12,7 @@ namespace EventBookingSystem.DomainEvents.Handlers
         {
             _emailService = emailService;
         }
-        public async Task HandleAsync(BookingConfirmedEvent @event)
+        public async Task HandleAsync(BookingConfirmedEvent @event, CancellationToken ct = default)
         {
             var filepath = $"{Directory.GetCurrentDirectory()}\\DomainEvents\\Templates\\BookingConfirmedEmailTemplate.html";
             var str = new StreamReader(filepath);
@@ -30,7 +30,9 @@ namespace EventBookingSystem.DomainEvents.Handlers
             await _emailService.SendEmailAsync(
                 @event.UserEmail,
                 "Booking Confirmation",
-                mailText
+                mailText,
+                null,
+                ct
                 );
         }
     }

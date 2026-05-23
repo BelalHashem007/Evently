@@ -2,6 +2,7 @@ using EventBookingSystem.Areas.Admin.ViewModels;
 using EventBookingSystem.Common.Results;
 using EventBookingSystem.DomainEvents.Dispatcher;
 using EventBookingSystem.DomainEvents.Events;
+using EventBookingSystem.Extensions;
 using EventBookingSystem.Models;
 using EventBookingSystem.Repositories.Interfaces;
 using EventBookingSystem.Services.Interfaces;
@@ -12,7 +13,12 @@ using System.Security.Claims;
 
 namespace EventBookingSystem.Services
 {
-    public class BookingService(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IEventDispatcher eventDispatcher) : IBookingService
+    public class BookingService(
+        IUnitOfWork unitOfWork, 
+        UserManager<ApplicationUser> userManager, 
+        IEventDispatcher eventDispatcher,
+        ILogger<BookingService> logger
+        ) : IBookingService
     {
         private static readonly TimeSpan PendingBookingLifetime = TimeSpan.FromMinutes(15);
 
@@ -50,7 +56,7 @@ namespace EventBookingSystem.Services
                 .ToList();
         }
 
-        public async Task<Result<int>> CreateBookingAsync(CreateBookingViewModel model, int userId, CancellationToken ct = default)
+        public async Task<Result<int>> CreateBookingAsync(CreateBookingViewModel model, ClaimsPrincipal user, CancellationToken ct = default)
         {
             var eventItem = await unitOfWork.Events.GetByIdAsync(model.EventId, ct);
             if (eventItem == null)
@@ -95,7 +101,7 @@ namespace EventBookingSystem.Services
             var now = DateTime.UtcNow;
             var booking = new Booking
             {
-                UserId = userId,
+                UserId = user.GetCurrentUserId(),
                 EventId = model.EventId,
                 CreatedDate = now,
                 Status = BookingStatus.Pending,
@@ -117,9 +123,14 @@ namespace EventBookingSystem.Services
 
             await unitOfWork.Bookings.AddAsync(booking, ct);
             var dbResult = await unitOfWork.TryCompeleteAsync(ct);
+            var userEmail = user.FindFirstValue(ClaimTypes.Email);
 
-            var user = await userManager.FindByIdAsync(userId.ToString());
-            await eventDispatcher.PublishAsync(new BookingCreatedEvent(booking.Id, user.Email, eventItem.Name));
+            if (dbResult.Succeeded)
+            {
+                if (userEmail is not null)
+                    await eventDispatcher.PublishAsync(new BookingCreatedEvent(booking.Id, userEmail, eventItem.Name));
+                else logger.LogError("Failed to publish event 'BookingCreatedEvent' because userEmail is null");
+            }
 
             return dbResult.Succeeded
                 ? Result<int>.Success(booking.Id)

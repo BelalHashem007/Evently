@@ -134,17 +134,7 @@ namespace EventBookingSystem.Services
             try
             {
                 await unitOfWork.CompleteAsync(ct);
-                var eventItem = await unitOfWork.Events.GetByIdAsync(booking.EventId);
-                var user = await userManager.FindByIdAsync(booking.UserId.ToString());
-                await eventDispatcher.PublishAsync(new BookingConfirmedEvent(
-                    booking.Id,
-                    user.Email,
-                    eventItem.Name,
-                    eventItem.Date,
-                    eventItem.Venue,
-                    booking.BookingItems.Sum(i => i.Quantity),
-                    booking.TotalPrice
-                    ));
+                await DispatchBookingConfirmedEvent(booking);
                 return Result.Success();
             }
             catch (DbUpdateException e) when (IsDuplicateStripeSessionException(e))
@@ -159,6 +149,34 @@ namespace EventBookingSystem.Services
             return exception.InnerException is SqlException sqlException
                 && sqlException.Errors.Cast<SqlError>().Any(error => error.Number is 2601 or 2627)
                 && sqlException.Message.Contains("IX_Payments_StripeSessionId", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private async Task DispatchBookingConfirmedEvent(Booking booking)
+        {
+            var eventItem = await unitOfWork.Events.GetByIdAsync(booking.EventId);
+            var user = await userManager.FindByIdAsync(booking.UserId.ToString());
+
+            if (eventItem is null)
+            {
+                logger.LogError("Event does not exist for this id '{EventId}'", booking.EventId);
+                return;
+            }
+
+            if (user is null || user.Email is null)
+            {
+                logger.LogError("User or Email does not exist for this UserId '{UserId}'", booking.UserId);
+                return;
+            }
+
+            await eventDispatcher.PublishAsync(new BookingConfirmedEvent(
+                booking.Id,
+                user.Email,
+                eventItem.Name,
+                eventItem.Date,
+                eventItem.Venue,
+                booking.BookingItems.Sum(i => i.Quantity),
+                booking.TotalPrice
+                ));
         }
     }
 }

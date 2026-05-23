@@ -1,6 +1,6 @@
 using EventBookingSystem.Services.Interfaces;
 
-namespace EventBookingSystem.Services
+namespace EventBookingSystem.BackgroundJobs
 {
     public sealed class BookingExpiryHostedService(
         IServiceScopeFactory scopeFactory,

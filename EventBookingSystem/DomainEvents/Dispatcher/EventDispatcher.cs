@@ -1,22 +1,38 @@
-﻿using EventBookingSystem.DomainEvents.Handlers;
+﻿using EventBookingSystem.BackgroundJobs;
+using EventBookingSystem.DomainEvents.Handlers;
 
 namespace EventBookingSystem.DomainEvents.Dispatcher
 {
     public class EventDispatcher : IEventDispatcher
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IBackgroundTaskQueue _queue;
 
-        public EventDispatcher(IServiceProvider serviceProvider)
+        public EventDispatcher(IBackgroundTaskQueue queue)
         {
-            _serviceProvider = serviceProvider;
+            _queue = queue;
         }
-        public async Task PublishAsync<TEvent>(TEvent @event)
+        public ValueTask PublishAsync<TEvent>(TEvent @event, CancellationToken ct = default)
         {
-            var handlers = _serviceProvider.GetServices<IEventHandler<TEvent>>();
-            foreach(var handler in handlers)
-            {
-                await handler.HandleAsync(@event);
-            }
+            return _queue.QueueAsync(async (_serviceProvider, ct) =>
+                {
+                    var handlers = _serviceProvider.GetServices<IEventHandler<TEvent>>();
+                    var logger = _serviceProvider.GetRequiredService<ILogger<EventDispatcher>>();
+                    foreach (var handler in handlers)
+                    {
+                        try
+                        {
+                            await handler.HandleAsync(@event, ct);
+                        }
+                        catch(Exception ex)
+                        {
+                            logger.LogError(
+                                ex,
+                                "Domain event handler {Handler} failed for event {Event}",
+                                handler.GetType().Name,
+                                typeof(TEvent).Name);
+                        }
+                    }
+                }, ct);
         }
     }
 }

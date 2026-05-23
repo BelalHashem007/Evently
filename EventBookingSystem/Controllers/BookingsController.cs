@@ -68,7 +68,7 @@ namespace EventBookingSystem.Controllers
                 return RedirectToAction("Details", "Events", new { id = model.EventId });
             }
 
-            var result = await bookingService.CreateBookingAsync(model, User.GetCurrentUserId(), ct);
+            var result = await bookingService.CreateBookingAsync(model, User, ct);
             if (!result.Succeeded || result.Value == 0)
             {
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Could not create booking.";

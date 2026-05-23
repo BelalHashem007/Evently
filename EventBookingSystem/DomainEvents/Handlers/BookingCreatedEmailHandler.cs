@@ -12,19 +12,22 @@ namespace EventBookingSystem.DomainEvents.Handlers
         {
             _emailService = emailService;
         }
-        public async Task HandleAsync(BookingCreatedEvent @event)
+        public async Task HandleAsync(BookingCreatedEvent @event, CancellationToken ct = default)
         {
             var filepath = $"{Directory.GetCurrentDirectory()}\\DomainEvents\\Templates\\BookingCreatedEmailTemplate.html";
             var str = new StreamReader(filepath);
             var mailText = await str.ReadToEndAsync();
             str.Close();
 
-            mailText = mailText.Replace("[SiteUrl]", "https://localhost:7235").Replace("[BookingId]", @event.BookingId.ToString());
+            mailText = mailText.Replace("[SiteUrl]", "https://localhost:7235")
+                .Replace("[BookingId]", @event.BookingId.ToString());
 
             await _emailService.SendEmailAsync(
                 @event.UserEmail,
                 "Booking Creation",
-                mailText
+                mailText,
+                null,
+                ct
                 );
         }
     }
