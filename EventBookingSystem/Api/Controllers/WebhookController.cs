@@ -11,7 +11,7 @@ namespace EventBookingSystem.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(CancellationToken ct)
         {
-            var body = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            var body = await (new StreamReader(HttpContext.Request.Body)).ReadToEndAsync();
             if (!Request.Headers.TryGetValue("Stripe-Signature", out var signatureHeader))
                 return BadRequest();
 

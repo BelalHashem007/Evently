@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using EventBookingSystem.BackgroundJobs;
+using EventBookingSystem.Hubs;
 
 namespace EventBookingSystem
 {
@@ -47,9 +48,11 @@ namespace EventBookingSystem
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IEmailService, EmailSerivce>();
             builder.Services.AddScoped<IWebhookService, WebhookService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
             builder.Services.AddScoped<IdentitySeeder>();
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -71,6 +74,9 @@ namespace EventBookingSystem
                 options.LoginPath = "/auth/login";
             });
 
+            //signalr 
+            builder.Services.AddSignalR();
+
             //hosted services
             builder.Services.AddHostedService<BookingExpiryHostedService>();
             builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
@@ -79,6 +85,8 @@ namespace EventBookingSystem
             //domain event
             builder.Services.AddScoped<IEventHandler<BookingCreatedEvent>, BookingCreatedEmailHandler>();
             builder.Services.AddScoped<IEventHandler<BookingConfirmedEvent>, BookingConfirmedEmailHandler>();
+            builder.Services.AddScoped<IEventHandler<BookingCreatedEvent>, BookingCreatedNotificationHandler>();
+            builder.Services.AddScoped<IEventHandler<BookingConfirmedEvent>, BookingConfirmationNotificationHandler>();
             builder.Services.AddScoped<IEventDispatcher, EventDispatcher>();
 
             var app = builder.Build();
@@ -102,6 +110,7 @@ namespace EventBookingSystem
             app.UseRedirectMiddleware();
 
             app.MapStaticAssets();
+            app.MapHub<NotificationHub>("/notificationHub");
             app.MapControllerRoute(
                 name: "areas",
                 pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")

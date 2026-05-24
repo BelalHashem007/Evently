@@ -67,6 +67,7 @@
                                         <a class="nav-link @(isBookingsActive ? "active" : "")" asp-area="" asp-controller="Bookings" asp-action="Index">My Bookings</a>
                                     </li>
                                 }
+                                <partial name="~/Views/Shared/PartialViews/_NotificationDropdown.cshtml" />
                                 <li class="nav-item">
                                     <span class="nav-link">@User.Identity?.Name</span>
                                 </li>
@@ -104,6 +105,12 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+        {
+            <script src="~/lib/microsoft/signalr/dist/webworker/signalr.js" asp-append-version="true"></script>
+            <script src="~/js/notification.js" asp-append-version="true"></script>
+        }
+        
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

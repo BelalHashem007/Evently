@@ -11,6 +11,7 @@ namespace EventBookingSystem.Repositories
         IBookingRepository bookingRepo,
         IBaseRepository<BookingItem> bookingItemRepo,
         IBaseRepository<Payment> paymentRepo,
+        INotificationRepository notificationRepo,
         AppDbContext context,
         ILogger<UnitOfWork> logger
         ) : IUnitOfWork
@@ -20,6 +21,7 @@ namespace EventBookingSystem.Repositories
         public IBookingRepository Bookings => bookingRepo;
         public IBaseRepository<BookingItem> BookingItems => bookingItemRepo;
         public IBaseRepository<Payment> Payments => paymentRepo;
+        public INotificationRepository Notifications => notificationRepo;
 
         public async Task<int> CompleteAsync(CancellationToken ct)
         {

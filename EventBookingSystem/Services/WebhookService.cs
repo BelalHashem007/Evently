@@ -170,6 +170,7 @@ namespace EventBookingSystem.Services
 
             await eventDispatcher.PublishAsync(new BookingConfirmedEvent(
                 booking.Id,
+                user.Id,
                 user.Email,
                 eventItem.Name,
                 eventItem.Date,

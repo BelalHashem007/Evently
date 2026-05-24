@@ -128,7 +128,7 @@ namespace EventBookingSystem.Services
             if (dbResult.Succeeded)
             {
                 if (userEmail is not null)
-                    await eventDispatcher.PublishAsync(new BookingCreatedEvent(booking.Id, userEmail, eventItem.Name));
+                    await eventDispatcher.PublishAsync(new BookingCreatedEvent(booking.Id, booking.UserId, userEmail, eventItem.Name));
                 else logger.LogError("Failed to publish event 'BookingCreatedEvent' because userEmail is null");
             }
 

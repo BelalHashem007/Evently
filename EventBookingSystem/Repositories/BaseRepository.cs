@@ -5,8 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventBookingSystem.Repositories
 {
-    public class BaseRepository<T>(AppDbContext context) : IBaseRepository<T> where T : class
+    public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
+        protected AppDbContext context;
+
+        public BaseRepository(AppDbContext dbContext)
+        {
+            context = dbContext;
+        }
         public async Task<IEnumerable<T>> GetAllAsync(CancellationToken ct = default)
         {
             return await context.Set<T>().ToListAsync<T>(ct);

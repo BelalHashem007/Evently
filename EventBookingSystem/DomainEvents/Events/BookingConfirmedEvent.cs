@@ -2,6 +2,7 @@
 {
     public record BookingConfirmedEvent (
         int BookingId,
+        int UserId,
         string UserEmail,
         string EventName,
         DateTime EventDate,

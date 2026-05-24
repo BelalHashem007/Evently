@@ -1,6 +1,6 @@
 ﻿namespace EventBookingSystem.DomainEvents.Events
 {
-    public record BookingCreatedEvent(int BookingId, string UserEmail, string EventName)
+    public record BookingCreatedEvent(int BookingId, int UserId, string UserEmail, string EventName)
     {
     }
 }
