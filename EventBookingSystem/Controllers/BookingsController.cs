@@ -59,7 +59,7 @@ namespace EventBookingSystem.Controllers
             if (User.Identity?.IsAuthenticated != true)
             {
                 var returnUrl = Url.Action("Details", "Events", new { id = model.EventId }) ?? "/";
-                return RedirectToAction("Login", "Auth", new { returnUrl });
+                return RedirectToAction("Details", "Events", new { id = model.EventId, authModal = "login", returnUrl });
             }
 
             if (!ModelState.IsValid)

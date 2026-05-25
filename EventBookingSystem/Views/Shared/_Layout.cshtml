@@ -1,4 +1,5 @@
 ﻿@{
+    // getting active page
     var currentArea = ViewContext.RouteData.Values["area"]?.ToString();
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
@@ -7,18 +8,33 @@
     var isHomeActive = isPublicArea
         && string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
         && string.Equals(currentAction, "Index", StringComparison.OrdinalIgnoreCase);
-    var isPrivacyActive = isPublicArea
-        && string.Equals(currentController, "Home", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(currentAction, "Privacy", StringComparison.OrdinalIgnoreCase);
-    var isLoginActive = isPublicArea
-        && string.Equals(currentController, "Auth", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(currentAction, "Login", StringComparison.OrdinalIgnoreCase);
-    var isSignUpActive = isPublicArea
-        && string.Equals(currentController, "Auth", StringComparison.OrdinalIgnoreCase)
-        && string.Equals(currentAction, "SignUp", StringComparison.OrdinalIgnoreCase);
     var isBookingsActive = isPublicArea
         && string.Equals(currentController, "Bookings", StringComparison.OrdinalIgnoreCase);
     var isAdminActive = string.Equals(currentArea, "Admin", StringComparison.OrdinalIgnoreCase);
+
+    // setting up auth modals and returnurl
+    var requestedAuthModal = Context.Request.Query["authModal"].ToString();
+    var requestedReturnUrl = Context.Request.Query["returnUrl"].ToString();
+    var activeAuthModal = ViewData["ActiveAuthModal"] as string;
+    if (string.IsNullOrWhiteSpace(activeAuthModal)
+        && (string.Equals(requestedAuthModal, "login", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(requestedAuthModal, "signup", StringComparison.OrdinalIgnoreCase)))
+    {
+        activeAuthModal = requestedAuthModal.ToLowerInvariant();
+    }
+
+    var authReturnUrl = ViewData["AuthReturnUrl"] as string;
+    if (string.IsNullOrWhiteSpace(authReturnUrl)
+        && !string.IsNullOrWhiteSpace(requestedReturnUrl)
+        && Url.IsLocalUrl(requestedReturnUrl))
+    {
+        authReturnUrl = requestedReturnUrl;
+    }
+
+    if (string.IsNullOrWhiteSpace(authReturnUrl))
+    {
+        authReturnUrl = string.Concat(Context.Request.PathBase, Context.Request.Path, Context.Request.QueryString);
+    }
 }
 
 <!DOCTYPE html>
@@ -47,9 +63,6 @@
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
                             <a class="nav-link @(isHomeActive ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(isPrivacyActive ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
                     </ul>
                     <ul class="navbar-nav align-items-lg-center">
@@ -80,10 +93,10 @@
                             else
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link @(isLoginActive ? "active" : "")" asp-area="" asp-controller="Auth" asp-action="Login">Login</a>
+                                    <button class="nav-link btn btn-link" type="button" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
                                 </li>
                                 <li class="nav-item">
-                                <a class="nav-link @(isSignUpActive ? "active" : "")" asp-area="" asp-controller="Auth" asp-action="SignUp">Sign Up</a>
+                                    <button class="nav-link btn btn-link" type="button" data-bs-toggle="modal" data-bs-target="#signup-modal">Sign Up</button>
                                 </li>
                             }
                         </ul>
@@ -97,19 +110,59 @@
         </main>
     </div>
 
+    @if (User.Identity?.IsAuthenticated != true)
+    {
+        var loginModel = ViewData["LoginModel"] as LoginViewModel ?? new LoginViewModel();
+        var loginModalViewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary<LoginViewModel>(ViewData, loginModel);
+        loginModalViewData.TemplateInfo.HtmlFieldPrefix = "Login";
+        loginModalViewData["AuthReturnUrl"] = authReturnUrl;
+
+        var signUpModel = ViewData["SignUpModel"] as SignUpViewModel ?? new SignUpViewModel();
+        var signUpModalViewData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary<SignUpViewModel>(ViewData, signUpModel);
+        signUpModalViewData.TemplateInfo.HtmlFieldPrefix = "SignUp";
+        signUpModalViewData["AuthReturnUrl"] = authReturnUrl;
+
+        <partial name="~/Views/Shared/PartialViews/_LoginModal.cshtml"
+                 model="loginModel"
+                 view-data="loginModalViewData" />
+        <partial name="~/Views/Shared/PartialViews/_SignUpModal.cshtml"
+                 model="signUpModel"
+                 view-data="signUpModalViewData" />
+    }
+
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - EventBookingSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - EventBookingSystem
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @if (User.Identity?.IsAuthenticated != true)
+    {
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/js/auth-modals.js" asp-append-version="true"></script>
+    }
     @if (User.Identity?.IsAuthenticated == true)
         {
             <script src="~/lib/microsoft/signalr/dist/webworker/signalr.js" asp-append-version="true"></script>
             <script src="~/js/notification.js" asp-append-version="true"></script>
         }
+    @if (!string.IsNullOrWhiteSpace(activeAuthModal))
+    {
+        var activeAuthModalId = string.Equals(activeAuthModal, "signup", StringComparison.OrdinalIgnoreCase)
+            ? "signup-modal"
+            : "login-modal";
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const authModal = document.getElementById('@activeAuthModalId');
+                if (authModal) {
+                    bootstrap.Modal.getOrCreateInstance(authModal).show();
+                }
+            });
+        </script>
+    }
         
     @await RenderSectionAsync("Scripts", required: false)
 </body>

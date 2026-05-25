@@ -4,7 +4,6 @@ using EventBookingSystem.DomainEvents.Dispatcher;
 using EventBookingSystem.DomainEvents.Handlers;
 using EventBookingSystem.DomainEvents.Events;
 using EventBookingSystem.Exceptions;
-using EventBookingSystem.Middlewares;
 using EventBookingSystem.Models;
 using EventBookingSystem.Repositories;
 using EventBookingSystem.Repositories.Interfaces;
@@ -68,10 +67,16 @@ namespace EventBookingSystem
             })
             .AddEntityFrameworkStores<AppDbContext>();
 
-            //override Identity's default path for login
             builder.Services.ConfigureApplicationCookie(options =>
             {
-                options.LoginPath = "/auth/login";
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    var returnUrl = string.Concat(context.Request.PathBase, context.Request.Path, context.Request.QueryString);
+                    var encodedReturnUrl = Uri.EscapeDataString(returnUrl);
+
+                    context.Response.Redirect($"/?authModal=login&returnUrl={encodedReturnUrl}");
+                    return Task.CompletedTask;
+                };
             });
 
             //signalr 
@@ -105,9 +110,6 @@ namespace EventBookingSystem
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            //custom middleware to redirect authenticated user when he tries to access prohibited paths e.g. /auth/login
-            app.UseRedirectMiddleware();
 
             app.MapStaticAssets();
             app.MapHub<NotificationHub>("/notificationHub");
