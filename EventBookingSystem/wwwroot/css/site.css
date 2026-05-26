@@ -35,6 +35,172 @@ body {
     color: red;
 }
 
+.event-card {
+    overflow: hidden;
+    border: 0;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-0.25rem);
+    box-shadow: 0 0.75rem 1.75rem rgba(0, 0, 0, 0.12) !important;
+}
+
+.event-card-image-wrap {
+    position: relative;
+}
+
+.event-card-image,
+.event-card-placeholder {
+    height: 220px;
+}
+
+.event-card-image {
+    object-fit: cover;
+}
+
+.event-card-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    color: var(--bs-secondary-color);
+    text-align: center;
+    background: linear-gradient(135deg, var(--bs-light), var(--bs-gray-200));
+}
+
+.event-date-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    min-width: 3.75rem;
+    padding: 0.45rem 0.6rem;
+    color: var(--bs-body-color);
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.94);
+    border-radius: var(--bs-border-radius);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.14);
+}
+
+.event-date-badge-month {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--bs-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.event-date-badge-day {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 1.35rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.event-card-title {
+    margin-bottom: 0.75rem;
+    line-height: 1.35;
+}
+
+.event-card-meta {
+    display: grid;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.92rem;
+}
+
+.event-card-price {
+    margin-bottom: 1.25rem;
+    color: var(--bs-primary);
+    font-weight: 700;
+}
+
+.event-details-hero {
+    overflow: hidden;
+    border-radius: var(--bs-border-radius-lg);
+}
+
+.event-details-image,
+.event-details-placeholder {
+    width: 100%;
+    height: 240px;
+}
+
+.event-details-image {
+    display: block;
+    object-fit: cover;
+}
+
+.event-details-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--bs-secondary-color);
+    text-align: center;
+    background: linear-gradient(135deg, var(--bs-light), var(--bs-gray-200));
+}
+
+.event-details-meta {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--bs-secondary-color);
+}
+
+.event-ticket-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.event-ticket-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+}
+
+.event-ticket-info {
+    min-width: 0;
+}
+
+.event-ticket-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.92rem;
+}
+
+.event-ticket-quantity {
+    flex: 0 0 5.5rem;
+}
+
+@media (min-width: 768px) {
+    .event-details-image,
+    .event-details-placeholder {
+        height: 360px;
+    }
+}
+
+@media (min-width: 992px) {
+    .event-booking-panel {
+        position: sticky;
+        top: 1.5rem;
+    }
+
+    .event-details-image,
+    .event-details-placeholder {
+        height: 420px;
+    }
+}
+
 .notification-dropdown-menu {
     width: min(22rem, calc(100vw - 2rem));
     padding: 0;

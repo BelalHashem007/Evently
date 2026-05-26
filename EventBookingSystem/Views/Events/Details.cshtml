@@ -3,14 +3,12 @@
 @{
     ViewData["Title"] = Model.Name;
     var hasAvailableTickets = Model.TicketTypes.Any(t => t.AvailableQuantity > 0);
-    var returnUrl = Url.Action("Details", "Events", new { id = Model.Id });
 }
 
 <div class="mb-4">
     <a asp-controller="Home" asp-action="Index" class="btn btn-link px-0">&larr; Back to events</a>
 </div>
 
-<!-- Info + Admin buttons-->
 @if (Model.IsCancelled)
 {
     <div class="alert alert-warning">This event has been cancelled.</div>
@@ -21,114 +19,132 @@
     <div class="alert alert-danger">@errorMessage</div>
 }
 
-@if (User.IsInRole("Admin") && !Model.IsCancelled)
-{
-    <div class="d-flex gap-2 mb-4">
-        <a asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id" asp-area="Admin" class="btn btn-secondary">Edit</a>
-        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancel-event-modal-@Model.Id">Cancel</button>
-    </div>
-}
-
-<!-- Actual page content-->
-
-<section class="mb-4">
+<section class="event-details-hero mb-4">
     @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
-        <img src="@Model.ImageUrl" class="img-fluid rounded w-100" alt="@Model.Name" style="max-height: 420px; object-fit: cover;" />
+        <img src="@Model.ImageUrl" class="event-details-image" alt="@Model.Name" />
     }
     else
     {
-        <div class="bg-light d-flex align-items-center justify-content-center text-muted rounded" style="height: 320px;">
-            No image available
+        <div class="event-details-placeholder">
+            <span>@Model.Name</span>
         </div>
     }
 </section>
 
-<div class="mb-4">
-    <h1 class="mb-2">@Model.Name</h1>
-    <p class="text-muted mb-0">@(Model.Date.ToString("MMMM dd, yyyy")) | @(Model.Date.ToString("hh:mm")) @(Model.Date.ToString("tt"))</p>
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="mb-2">@Model.Name</h1>
+        <div class="event-details-meta">
+            <span>@Model.Date.ToString("MMMM dd, yyyy") at @Model.Date.ToString("hh:mm tt")</span>
+            <span>@Model.Venue</span>
+        </div>
+    </div>
+
+    @if (User.IsInRole("Admin") && !Model.IsCancelled)
+    {
+        <div class="d-flex gap-2 align-self-md-start">
+            <a asp-controller="Events" asp-action="Edit" asp-route-id="@Model.Id" asp-area="Admin" class="btn btn-secondary">Edit</a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancel-event-modal-@Model.Id">Cancel</button>
+        </div>
+    }
 </div>
 
-<section class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h2 class="h4 card-title">About Event</h2>
-        <p class="card-text mb-0">@Model.Description</p>
-    </div>
-</section>
-
-<section class="mb-4">
-    <h2 class="h4 mb-3">Tickets</h2>
-
-    @if (Model.TicketTypes.Count == 0)
-    {
-        <div class="alert alert-info">No ticket types are available for this event yet.</div>
-    }
-    else
-    {
-        @if (User.Identity?.IsAuthenticated != true)
-        {
-            <div class="alert alert-info d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                <span>Sign in or create an account to book tickets for this event.</span>
-                <span class="d-flex gap-2">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#signup-modal">Sign Up</button>
-                </span>
+<div class="row g-4 align-items-start">
+    <div class="col-lg-7 order-2 order-lg-1">
+        <section class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h4 card-title">About this event</h2>
+                <p class="card-text mb-0">@Model.Description</p>
             </div>
-        }
+        </section>
 
-        <form asp-controller="Bookings" asp-action="Create" method="post">
-            <input type="hidden" name="EventId" value="@Model.Id" />
-            <div class="row g-3">
-                @for (var i = 0; i < Model.TicketTypes.Count; i++)
+        <section class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 card-title">Venue</h2>
+                <p class="card-text mb-0">@Model.Venue</p>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-lg-5 order-1 order-lg-2">
+        <section class="card shadow-sm event-booking-panel">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                    <div>
+                        <h2 class="h4 card-title mb-1">Tickets</h2>
+                        <p class="text-muted mb-0">Choose your ticket quantity.</p>
+                    </div>
+                    @if (Model.IsCancelled)
+                    {
+                        <span class="badge text-bg-warning">Cancelled</span>
+                    }
+                </div>
+
+                @if (Model.TicketTypes.Count == 0)
                 {
-                    var ticketType = Model.TicketTypes[i];
-                    var isSoldOut = ticketType.AvailableQuantity <= 0;
-
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card h-100">
-                            <div class="card-body d-flex flex-column">
-                                <h3 class="h5 card-title">@ticketType.Name</h3>
-                                <p class="card-text mb-1">
-                                    <strong>Price:</strong> @ticketType.Price.ToString("C")
-                                </p>
-                                <p class="card-text mb-3">
-                                    <strong>Amount left:</strong> @ticketType.AvailableQuantity
-                                </p>
-                                <input type="hidden" name="Tickets[@i].TicketTypeId" value="@ticketType.Id" />
-                                <label for="ticket-quantity-@ticketType.Id" class="form-label mt-auto">Quantity</label>
-                                <input id="ticket-quantity-@ticketType.Id"
-                                       name="Tickets[@i].Quantity"
-                                       type="number"
-                                       min="0"
-                                       max="@ticketType.AvailableQuantity"
-                                       value="0"
-                                       class="form-control"
-                                       disabled="@(isSoldOut || Model.IsCancelled)" />
-                                @if (isSoldOut)
-                                {
-                                    <span class="badge text-bg-secondary mt-3 align-self-start">Sold out</span>
-                                }
+                    <div class="alert alert-info mb-0">No ticket types are available for this event yet.</div>
+                }
+                else
+                {
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <div class="alert alert-info">
+                            <p class="mb-3">Sign in or create an account to book tickets for this event.</p>
+                            <div class="d-grid d-sm-flex gap-2">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#login-modal">Login</button>
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#signup-modal">Sign Up</button>
                             </div>
                         </div>
-                    </div>
+                    }
+
+                    <form asp-controller="Bookings" asp-action="Create" method="post">
+                        <input type="hidden" name="EventId" value="@Model.Id" />
+
+                        <div class="event-ticket-list">
+                            @for (var i = 0; i < Model.TicketTypes.Count; i++)
+                            {
+                                var ticketType = Model.TicketTypes[i];
+                                var isSoldOut = ticketType.AvailableQuantity <= 0;
+
+                                <div class="event-ticket-row">
+                                    <div class="event-ticket-info">
+                                        <h3 class="h6 mb-1">@ticketType.Name</h3>
+                                        <div class="event-ticket-meta">
+                                            <span>@ticketType.Price.ToString("C")</span>
+                                            <span>@ticketType.AvailableQuantity left</span>
+                                        </div>
+                                        @if (isSoldOut)
+                                        {
+                                            <span class="badge text-bg-secondary mt-2">Sold out</span>
+                                        }
+                                    </div>
+
+                                    <div class="event-ticket-quantity">
+                                        <input type="hidden" name="Tickets[@i].TicketTypeId" value="@ticketType.Id" />
+                                        <label for="ticket-quantity-@ticketType.Id" class="form-label visually-hidden">Quantity for @ticketType.Name</label>
+                                        <input id="ticket-quantity-@ticketType.Id"
+                                               name="Tickets[@i].Quantity"
+                                               type="number"
+                                               min="0"
+                                               max="@ticketType.AvailableQuantity"
+                                               value="0"
+                                               class="form-control"
+                                               disabled="@(isSoldOut || Model.IsCancelled)" />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-4" disabled="@(Model.IsCancelled || !hasAvailableTickets)">
+                            @(User.Identity?.IsAuthenticated == true ? "Reserve Tickets" : "Login to Book")
+                        </button>
+                    </form>
                 }
             </div>
-
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary" disabled="@(Model.IsCancelled || !hasAvailableTickets)">
-                    @(User.Identity?.IsAuthenticated == true ? "Reserve Tickets" : "Login to Book")
-                </button>
-            </div>
-        </form>
-    }
-</section>
-
-<section class="card shadow-sm">
-    <div class="card-body">
-        <h2 class="h5 card-title">Venue</h2>
-        <p class="card-text mb-0">@Model.Venue</p>
+        </section>
     </div>
-</section>
+</div>
 
 @if (User.IsInRole("Admin") && !Model.IsCancelled)
 {
