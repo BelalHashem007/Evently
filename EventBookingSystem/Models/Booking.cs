@@ -8,7 +8,7 @@ namespace EventBookingSystem.Models
         public decimal TotalPrice { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
-        public DateTime? ExpiresAt { get; set; }
+        public DateTime ExpiresAt { get; set; }
 
         [ForeignKey("User")]
         public int UserId { get; set; }

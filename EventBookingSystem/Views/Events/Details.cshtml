@@ -36,7 +36,7 @@
     <div>
         <h1 class="mb-2">@Model.Name</h1>
         <div class="event-details-meta">
-            <span>@Model.Date.ToString("MMMM dd, yyyy") at @Model.Date.ToString("hh:mm tt")</span>
+            <span data-date="@DateTime.SpecifyKind(Model.Date, DateTimeKind.Utc).ToString("o")"></span>
             <span>@Model.Venue</span>
         </div>
     </div>

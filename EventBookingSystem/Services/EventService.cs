@@ -83,7 +83,7 @@ namespace EventBookingSystem.Services
             var activeBookings = (await unitOfWork.Bookings.FindAsync(b =>
                     b.EventId == id &&
                     (b.Status == BookingStatus.Confirmed ||
-                     (b.Status == BookingStatus.Pending && (!b.ExpiresAt.HasValue || b.ExpiresAt > now))), ct))
+                     (b.Status == BookingStatus.Pending && (b.ExpiresAt > now))), ct))
                 .Select(b => b.Id)
                 .ToHashSet();
             var bookedQuantities = ticketTypeIds.Count == 0

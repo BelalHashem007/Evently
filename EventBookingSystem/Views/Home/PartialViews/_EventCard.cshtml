@@ -1,4 +1,7 @@
 @model EventBookingSystem.ViewModels.EventCardViewModel
+@{
+    var dateIso = DateTime.SpecifyKind(Model.Date, DateTimeKind.Utc).ToString("o");
+}
 
 <div class="card event-card h-100 shadow-sm">
     <div class="event-card-image-wrap">
@@ -14,15 +17,15 @@
         }
 
         <div class="event-date-badge">
-            <span class="event-date-badge-month">@Model.Date.ToString("MMM")</span>
-            <span class="event-date-badge-day">@Model.Date.ToString("dd")</span>
+            <span class="event-date-badge-month" data-date-badge-month="@dateIso"></span>
+            <span class="event-date-badge-day" data-date-badge-day="@dateIso"></span>
         </div>
     </div>
 
     <div class="card-body d-flex flex-column">
         <h5 class="card-title event-card-title">@Model.Name</h5>
         <div class="event-card-meta">
-            <span>@Model.Date.ToString("MMMM dd, yyyy")</span>
+            <span data-date-card="@dateIso"></span>
             <span class="text-truncate" title="@Model.Venue">@Model.Venue</span>
         </div>
         <p class="event-card-price">

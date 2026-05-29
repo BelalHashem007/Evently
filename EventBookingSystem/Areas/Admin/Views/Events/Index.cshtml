@@ -38,7 +38,7 @@
                     {
                         <tr>
                             <td>@eventItem.Name</td>
-                            <td>@eventItem.Date.ToString("MMM dd, yyyy")</td>
+                            <td data-date-admin="@DateTime.SpecifyKind(eventItem.Date, DateTimeKind.Utc).ToString("o")"></td>
                             <td>@eventItem.Venue</td>
                             <td>@eventItem.TicketTypeCount</td>
                             <td>

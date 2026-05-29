@@ -35,13 +35,13 @@
                         <tr>
                             <td>
                                 <div class="fw-semibold">@booking.EventName</div>
-                                <div class="text-muted small">@booking.EventDate.ToString("MMM dd, yyyy hh:mm tt")</div>
+                                <div class="text-muted small" data-date="@DateTime.SpecifyKind(booking.EventDate, DateTimeKind.Utc).ToString("o")"></div>
                             </td>
                             <td>
                                 <span class="badge @BookingStatusUi.BadgeClass(booking.Status)">@booking.Status</span>
                             </td>
                             <td>@booking.TotalPrice.ToString("C")</td>
-                            <td>@(booking.ExpiresAt?.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt") ?? "-")</td>
+                            <td data-date="@DateTime.SpecifyKind(booking.ExpiresAt, DateTimeKind.Utc).ToString("o")"></td>
                             <td class="text-end">
                                 <a asp-action="Details" asp-route-id="@booking.Id" class="btn btn-sm btn-outline-primary">View</a>
                             </td>

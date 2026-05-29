@@ -248,7 +248,6 @@ namespace EventBookingSystem.Services
             var now = DateTime.UtcNow;
             var expiredBookings = await unitOfWork.Bookings.FindAsync(b =>
                 b.Status == BookingStatus.Pending &&
-                b.ExpiresAt.HasValue &&
                 b.ExpiresAt <= now, ct);
 
             if (expiredBookings.Count == 0)
@@ -268,7 +267,6 @@ namespace EventBookingSystem.Services
         private static BookingStatus GetEffectiveStatus(Booking booking, DateTime now)
         {
             return booking.Status == BookingStatus.Pending &&
-                   booking.ExpiresAt.HasValue &&
                    booking.ExpiresAt <= now
                 ? BookingStatus.Expired
                 : booking.Status;
@@ -286,7 +284,7 @@ namespace EventBookingSystem.Services
             var activeBookingIds = (await unitOfWork.Bookings.FindAsync(b =>
                     b.EventId == eventId &&
                     (b.Status == BookingStatus.Confirmed ||
-                     (b.Status == BookingStatus.Pending && (!b.ExpiresAt.HasValue || b.ExpiresAt > now))), ct))
+                     (b.Status == BookingStatus.Pending && (b.ExpiresAt > now))), ct))
                 .Select(b => b.Id)
                 .ToHashSet();
 

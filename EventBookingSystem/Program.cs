@@ -37,6 +37,7 @@ namespace EventBookingSystem
                 options.SupportedUICultures = [egpCulture];
             });
             builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+            builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection("ApplicationSettings"));
 
             // Add services to the container.
             builder.Services.AddScoped<IAuthService, AuthService>();

@@ -12,12 +12,11 @@
 
 <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
     <div>
-        <h1 class="h3 mb-1">Booking #@Model.Id</h1>
-        <p class="text-muted mb-0">@Model.EventName</p>
+        <h1 class="h3 mb-1">@Model.EventName</h1>
     </div>
     <div class="text-md-end">
         <span class="badge @BookingStatusUi.BadgeClass(Model.Status) fs-6">@Model.Status</span>
-        <div class="text-muted small mt-2">Created @Model.CreatedDate.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")</div>
+        <div class="text-muted small mt-2">Created at <span class="fw-bold" data-date="@DateTime.SpecifyKind(Model.CreatedDate, DateTimeKind.Utc).ToString("o")"></span></div>
     </div>
 </div>
 

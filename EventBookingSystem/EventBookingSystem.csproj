@@ -26,4 +26,13 @@
     <PackageReference Include="Stripe.net" Version="51.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DomainEvents\Templates\BookingConfirmedEmailTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DomainEvents\Templates\BookingCreatedEmailTemplate.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

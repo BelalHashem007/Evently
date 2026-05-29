@@ -9,7 +9,7 @@ namespace EventBookingSystem.ViewModels
         public DateTime EventDate { get; set; }
         public BookingStatus Status { get; set; }
         public DateTime CreatedDate { get; set; }
-        public DateTime? ExpiresAt { get; set; }
+        public DateTime ExpiresAt { get; set; }
         public decimal TotalPrice { get; set; }
     }
 }
