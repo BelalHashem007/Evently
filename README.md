@@ -167,7 +167,7 @@ Open one of the launch URLs:
 
 ## Stripe Webhooks
 
-For local webhook testing, install the Stripe CLI and forward events to the app:
+For local webhook testing, install the [Stripe CLI](https://docs.stripe.com/stripe-cli/install) and forward events to the app:
 
 ```powershell
 stripe listen --forward-to https://localhost:7235/api/webhook
@@ -177,7 +177,7 @@ Use the webhook signing secret from the Stripe CLI output as `Stripe:WebhookSecr
 
 ## Production Configuration
 
-For deployment, configure these values as environment variables or provider secrets:
+For deployment, configure these values as environment variables:
 
 - `ConnectionStrings__DefaultConnection`
 - `ApplicationSettings__BaseUrl`
