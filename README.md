@@ -6,11 +6,11 @@ Evently is an ASP.NET Core MVC web application for browsing events, booking tick
 
 ### User Features
 
-- Browse available events from the home page.
+- Browse paginated available events from the home page.
 - View event details and available ticket types.
 - Register, log in, and log out using ASP.NET Core Identity.
 - Create ticket bookings with pending reservation expiry.
-- View booking history and booking details.
+- View paginated booking history and booking details.
 - Cancel pending bookings.
 - Pay for bookings through Stripe Checkout.
 - Receive booking notifications through SignalR.
@@ -24,6 +24,50 @@ Evently is an ASP.NET Core MVC web application for browsing events, booking tick
 - View all bookings.
 - View registered users.
 - Role-based admin access through ASP.NET Core Identity.
+
+## System Flow
+
+The diagram below shows the main paths through the application: browsing and booking, Stripe payment confirmation, domain-event notifications, background expiry, and admin management.
+
+```mermaid
+flowchart TD
+    subgraph userFlow [User Flow]
+        BrowseEvents[Browse Events] --> EventDetails[View Event Details]
+        EventDetails --> Authenticated{Logged in?}
+        Authenticated -->|No| AuthModal[Login / Register Modal]
+        AuthModal --> CreateBooking[Create Booking]
+        Authenticated -->|Yes| CreateBooking
+        CreateBooking --> PendingBooking[Pending Booking]
+        PendingBooking --> CancelBooking[Cancel Booking]
+    end
+
+    subgraph paymentFlow [Payment Flow]
+        PendingBooking --> StripeCheckout[Stripe Checkout]
+        StripeCheckout --> StripeWebhook[Stripe Webhook]
+        StripeWebhook --> ConfirmedBooking[Booking Confirmed]
+    end
+
+    subgraph domainEvents [Domain Events]
+        PendingBooking --> BookingCreatedEvent[Booking Created Event]
+        BookingCreatedEvent --> CreatedEmail[Send Email]
+        BookingCreatedEvent --> CreatedNotification[SignalR Notification]
+        ConfirmedBooking --> BookingConfirmedEvent[Booking Confirmed Event]
+        BookingConfirmedEvent --> ConfirmedEmail[Send Email]
+        BookingConfirmedEvent --> ConfirmedNotification[SignalR Notification]
+    end
+
+    subgraph backgroundJobs [Background Jobs]
+        PendingBooking --> ExpiryJob[Booking Expiry Job]
+        ExpiryJob -->|Unpaid past expiry| ExpiredBooking[Booking Expired]
+    end
+
+    subgraph adminFlow [Admin Flow]
+        AdminLogin[Admin Login] --> AdminDashboard[Admin Dashboard]
+        AdminDashboard --> ManageEvents[Manage Events and Ticket Types]
+        AdminDashboard --> ViewBookings[View All Bookings]
+        AdminDashboard --> ViewUsers[View Users]
+    end
+```
 
 ## Technologies Used
 
@@ -99,6 +143,7 @@ dotnet user-secrets set "MailSettings:Port" "587"
 Notes:
 
 - `ConnectionStrings:DefaultConnection` is required.
+- `ApplicationSettings:BaseUrl` is used in booking emails (it's in appSettings for local dev). For production, set it to the deployed site URL.
 - `AdminSeed:Email` and `AdminSeed:Password` are optional, but if one is configured, both must be configured.
 - Stripe settings are required for checkout and webhook payment confirmation.
 - Mail settings are required for booking email notifications.
@@ -129,6 +174,23 @@ stripe listen --forward-to https://localhost:7235/api/webhook
 ```
 
 Use the webhook signing secret from the Stripe CLI output as `Stripe:WebhookSecret`.
+
+## Production Configuration
+
+For deployment, configure these values as environment variables or provider secrets:
+
+- `ConnectionStrings__DefaultConnection`
+- `ApplicationSettings__BaseUrl`
+- `AdminSeed__Email`
+- `AdminSeed__Password`
+- `Stripe__SecretKey`
+- `Stripe__PublishableKey`
+- `Stripe__WebhookSecret`
+- `MailSettings__Email`
+- `MailSettings__DisplayName`
+- `MailSettings__Password`
+- `MailSettings__Host`
+- `MailSettings__Port`
 
 ## Admin Access
 
