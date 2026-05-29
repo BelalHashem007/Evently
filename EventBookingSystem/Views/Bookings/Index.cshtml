@@ -1,4 +1,4 @@
-@model IReadOnlyList<BookingListItemViewModel>
+@model PaginatedViewModel<BookingListItemViewModel>
 
 @{
     ViewData["Title"] = "My Bookings";
@@ -10,6 +10,7 @@
 </div>
 
 <div class="card shadow-sm">
+    <!-- Table -->
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead>
@@ -22,7 +23,7 @@
                 </tr>
             </thead>
             <tbody>
-                @if (Model.Count == 0)
+                @if (Model.Items.Count == 0)
                 {
                     <tr>
                         <td colspan="6" class="text-center text-muted py-4">You do not have any bookings yet.</td>
@@ -30,7 +31,7 @@
                 }
                 else
                 {
-                    @foreach (var booking in Model)
+                    @foreach (var booking in Model.Items)
                     {
                         <tr>
                             <td>
@@ -52,3 +53,15 @@
         </table>
     </div>
 </div>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation" class="my-4">
+    <ul id="pagination-container" class="pagination justify-content-center">
+    </ul>
+</nav>
+
+<input type="hidden" name="page" value="@Model.Page" />
+<input type="hidden" name="totalItems" value="@Model.TotalItems" />
+<input type="hidden" name="maxItemsPerPage" value="@Model.MaxItemsPerPage" />
+
+<script src="~/js/pagination.js"></script>

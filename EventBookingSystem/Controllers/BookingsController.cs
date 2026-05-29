@@ -11,9 +11,9 @@ namespace EventBookingSystem.Controllers
     {
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Index(CancellationToken ct)
+        public async Task<IActionResult> Index(CancellationToken ct, [FromQuery] int page = 1)
         {
-            var bookings = await bookingService.GetUserBookingsAsync(User.GetCurrentUserId(), ct);
+            var bookings = await bookingService.GetUserBookingsAsync(page, User.GetCurrentUserId(), ct);
             return View(bookings);
         }
 

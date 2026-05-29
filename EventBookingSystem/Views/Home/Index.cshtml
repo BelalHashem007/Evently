@@ -1,4 +1,4 @@
-﻿@model IReadOnlyList<EventBookingSystem.ViewModels.EventCardViewModel>
+﻿@model PaginatedViewModel<EventCardViewModel>
 
 @{
     ViewData["Title"] = "Events";
@@ -14,20 +14,33 @@
     {
         <a asp-controller="Events" asp-action="Create" asp-area="Admin" class="btn btn-primary">Create New Event</a>
     }
+
 </div>
 
-@if (Model.Count == 0)
+@if (Model.Items.Count == 0)
 {
     <div class="alert alert-info">No events are available yet.</div>
 }
 else
 {
     <div class="row g-4">
-        @foreach (var eventItem in Model)
+        @foreach (var eventItem in Model.Items)
         {
             <div class="col-md-6 col-xl-4">
                 <partial name="~/Views/Home/PartialViews/_EventCard.cshtml" model="eventItem" />
             </div>
         }
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation" class="my-4">
+            <ul id="pagination-container" class="pagination justify-content-center">
+            </ul>
+        </nav>
+
+        <input type="hidden" name="page" value="@Model.Page" />
+        <input type="hidden" name="totalItems" value="@Model.TotalItems" />
+        <input type="hidden" name="maxItemsPerPage" value="@Model.MaxItemsPerPage" />
     </div>
 }
+
+<script src="~/js/pagination.js"></script>

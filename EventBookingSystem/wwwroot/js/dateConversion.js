@@ -12,7 +12,6 @@
 
 document.querySelectorAll("[data-date-badge-month]").forEach(el => {
     const date = new Date(el.dataset.dateBadgeMonth);
-    console.log(date);
     el.textContent = date.toLocaleDateString(undefined, {
         month: "short"
     });

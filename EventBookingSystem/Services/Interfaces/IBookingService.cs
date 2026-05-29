@@ -10,7 +10,7 @@ namespace EventBookingSystem.Services.Interfaces
     {
         Task<IReadOnlyList<AdminBookingListItemViewModel>> GetAdminBookingListAsync(CancellationToken ct = default);
         Task<Result<int>> CreateBookingAsync(CreateBookingViewModel model, ClaimsPrincipal user, CancellationToken ct = default);
-        Task<IReadOnlyList<BookingListItemViewModel>> GetUserBookingsAsync(int userId, CancellationToken ct = default);
+        Task<PaginatedViewModel<BookingListItemViewModel>> GetUserBookingsAsync(int page, int userId, CancellationToken ct = default);
         Task<BookingDetailsViewModel?> GetUserBookingDetailsAsync(int bookingId, int userId, CancellationToken ct = default);
         Task<Result<BookingStatus>> GetUserBookingStatusAsync(int bookingId, int userId, CancellationToken ct = default);
         Task<Result> CancelUserBookingAsync(int bookingId, int userId, CancellationToken ct = default);

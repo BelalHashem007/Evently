@@ -6,7 +6,7 @@ namespace EventBookingSystem.Services.Interfaces
 {
     public interface IEventService
     {
-        Task<IReadOnlyList<EventCardViewModel>> GetEventCardsAsync(CancellationToken ct = default);
+        Task<PaginatedViewModel<EventCardViewModel>> GetEventCardsAsync(int page, CancellationToken ct = default);
         Task<IReadOnlyList<AdminEventListItemViewModel>> GetAdminEventListAsync(CancellationToken ct = default);
         Task<EventDetailsViewModel?> GetEventDetailsAsync(int id, CancellationToken ct = default);
         Task<EventFormViewModel> GetCreateFormAsync(CancellationToken ct = default);

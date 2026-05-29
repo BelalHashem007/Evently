@@ -9,23 +9,30 @@ namespace EventBookingSystem.Services
 {
     public class EventService(IUnitOfWork unitOfWork) : IEventService
     {
-        public async Task<IReadOnlyList<EventCardViewModel>> GetEventCardsAsync(CancellationToken ct = default)
+        public async Task<PaginatedViewModel<EventCardViewModel>> GetEventCardsAsync(int page, CancellationToken ct = default)
         {
-            var events = (await unitOfWork.Events.FindAsync(e => !e.IsCancelled, ct))
-                .OrderBy(e => e.Date)
-                .ToList();
+            var take = 15;
+            var skip = (page - 1) * take;
+            var events = await unitOfWork.Events.FindWithPaginationAsync(e => !e.IsCancelled, e => e.Date, skip, take, false, ct);
 
             if (events.Count == 0)
             {
-                return [];
+                return new PaginatedViewModel<EventCardViewModel>
+                {
+                    Items = [],
+                    Page = page,
+                    TotalItems = 0,
+                    MaxItemsPerPage = take,
+                };
             }
 
+            var eventsTotalCount = await unitOfWork.Events.CountAsync(e => !e.IsCancelled, ct);
             var eventIds = events.Select(e => e.Id).ToList();
             var ticketTypesByEventId = (await unitOfWork.TicketTypes.FindAsync(t => eventIds.Contains(t.EventId), ct))
                 .GroupBy(t => t.EventId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            return events
+            var eventsList = events
                 .Select(e => new EventCardViewModel
                 {
                     Id = e.Id,
@@ -36,6 +43,14 @@ namespace EventBookingSystem.Services
                     PriceRange = GetPriceRange(ticketTypesByEventId.GetValueOrDefault(e.Id) ?? [])
                 })
                 .ToList();
+
+            return new PaginatedViewModel<EventCardViewModel>
+            {
+                Items = eventsList,
+                Page = page,
+                TotalItems = eventsTotalCount,
+                MaxItemsPerPage = take
+            };
         }
 
         public async Task<IReadOnlyList<AdminEventListItemViewModel>> GetAdminEventListAsync(CancellationToken ct = default)

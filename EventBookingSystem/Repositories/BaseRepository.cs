@@ -55,5 +55,39 @@ namespace EventBookingSystem.Repositories
             return true;
         }
 
+        public async Task<IReadOnlyList<T>> FindWithPaginationAsync(
+             Expression<Func<T, bool>> predicate,
+             int skip = 0,
+             int take = 15,
+             CancellationToken ct = default)
+        {
+            var query = context.Set<T>().Where(predicate);
+
+            query = query.Skip(skip).Take(take);
+
+            return await query.ToListAsync(ct);
+        }
+
+        public async Task<IReadOnlyList<T>> FindWithPaginationAsync<TKey>(
+            Expression<Func<T, bool>> predicate, 
+            Expression<Func<T, TKey>> order, 
+            int skip = 0, 
+            int take = 15,
+            bool isDescending = false,
+            CancellationToken ct = default)
+        {
+            var query = context.Set<T>().Where(predicate);
+            if (isDescending)
+                query = query.OrderByDescending(order).Skip(skip).Take(take);
+            else query = query.OrderBy(order).Skip(skip).Take(take);
+            return await query.ToListAsync(ct);
+        }
+
+        public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, CancellationToken ct = default)
+        {
+            if (predicate == null)
+                return await context.Set<T>().CountAsync(ct);
+            else return await context.Set<T>().Where(predicate).CountAsync(ct);
+        }
     }
 }

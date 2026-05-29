@@ -7,9 +7,9 @@ namespace EventBookingSystem.Controllers
 {
     public class HomeController(IEventService eventService) : Controller
     {
-        public async Task<IActionResult> Index(CancellationToken ct)
+        public async Task<IActionResult> Index(CancellationToken ct, [FromQuery] int page = 1)
         {
-            var events = await eventService.GetEventCardsAsync(ct);
+            var events = await eventService.GetEventCardsAsync(page, ct);
             return View(events);
         }
 

@@ -137,23 +137,36 @@ namespace EventBookingSystem.Services
                 : Result<int>.Failure(dbResult.ErrorMessage ?? "Could not create booking.");
         }
 
-        public async Task<IReadOnlyList<BookingListItemViewModel>> GetUserBookingsAsync(int userId, CancellationToken ct = default)
+        public async Task<PaginatedViewModel<BookingListItemViewModel>> GetUserBookingsAsync(int page, int userId, CancellationToken ct = default)
         {
-            var bookings = (await unitOfWork.Bookings.FindAsync(b => b.UserId == userId, ct))
-                .OrderByDescending(b => b.CreatedDate)
-                .ToList();
+            var take = 10;
+            var skip = (page - 1) * take;
+            var bookings = await unitOfWork.Bookings.FindWithPaginationAsync(
+                b => b.UserId == userId,
+                b => b.CreatedDate,
+                skip,
+                take,
+                true,
+                ct);
 
             if (bookings.Count == 0)
             {
-                return [];
+                return new PaginatedViewModel<BookingListItemViewModel>
+                {
+                    Items = [],
+                    Page = page,
+                    TotalItems = 0,
+                    MaxItemsPerPage = take,
+                };
             }
 
+            var bookingsTotalCount = await unitOfWork.Bookings.CountAsync(b => b.UserId == userId, ct);
             var eventIds = bookings.Select(b => b.EventId).Distinct().ToList();
             var eventsById = (await unitOfWork.Events.FindAsync(e => eventIds.Contains(e.Id), ct))
                 .ToDictionary(e => e.Id);
 
             var now = DateTime.UtcNow;
-            return bookings
+            var bookingsList =  bookings
                 .Select(b => new BookingListItemViewModel
                 {
                     Id = b.Id,
@@ -165,6 +178,14 @@ namespace EventBookingSystem.Services
                     TotalPrice = b.TotalPrice
                 })
                 .ToList();
+
+            return new PaginatedViewModel<BookingListItemViewModel>
+            {
+                Items = bookingsList,
+                Page = page,
+                TotalItems = bookingsTotalCount,
+                MaxItemsPerPage = take
+            };
         }
 
         public async Task<BookingDetailsViewModel?> GetUserBookingDetailsAsync(int bookingId, int userId, CancellationToken ct = default)
